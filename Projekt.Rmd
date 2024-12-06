@@ -41,3 +41,8 @@ unique(czynniki$Hours_Studied)
 data <- czynniki
 data_new <- data %>% filter(Exam_Score<101)
 ```
+```{r}
+install.packages("VIM")
+library(VIM)
+aggr(data_new, numbers = TRUE, sortVars = TRUE)
+```
