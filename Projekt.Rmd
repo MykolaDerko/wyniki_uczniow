@@ -35,3 +35,9 @@ unique(czynniki$Parental_Involvement)
 unique(czynniki$Attendance)
 unique(czynniki$Hours_Studied)
 ```
+
+
+```{r} 
+data <- czynniki
+data_new <- data %>% filter(Exam_Score<101)
+```
