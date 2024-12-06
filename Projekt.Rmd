@@ -12,3 +12,26 @@ output:
 ## Global options
 knitr::opts_chunk$set(cache = TRUE)
 ```
+
+```{r}
+unique(czynniki$Exam_Score)
+unique(czynniki$Gender)
+unique(czynniki$Distance_from_Home)
+unique(czynniki$Parental_Education_Level)
+unique(czynniki$Learning_Disabilities)
+unique(czynniki$Physical_Activity)
+unique(czynniki$Peer_Influence)
+unique(czynniki$School_Type)
+unique(czynniki$Teacher_Quality)
+unique(czynniki$Family_Income)
+unique(czynniki$Tutoring_Sessions)
+unique(czynniki$Internet_Access)
+unique(czynniki$Motivation_Level)
+unique(czynniki$Previous_Scores)
+unique(czynniki$Sleep_Hours)
+unique(czynniki$Extracurricular_Activities)
+unique(czynniki$Access_to_Resources)
+unique(czynniki$Parental_Involvement)
+unique(czynniki$Attendance)
+unique(czynniki$Hours_Studied)
+```
