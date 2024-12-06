@@ -36,13 +36,46 @@ unique(czynniki$Attendance)
 unique(czynniki$Hours_Studied)
 ```
 
-
-```{r} 
+```{r}
 data <- czynniki
 data_new <- data %>% filter(Exam_Score<101)
 ```
+
 ```{r}
 install.packages("VIM")
 library(VIM)
 aggr(data_new, numbers = TRUE, sortVars = TRUE)
 ```
+
+# WNIOSKI
+
+## Tabela 1.
+
+Tabela pokazuje szczegóły proporcji braków dla pierwszych zmiennych w zestawie danych.
+
+Najwięcej braków występuje w:
+
+Sleep_Hours (5,38%)
+
+Family_Income (5,15%)
+
+Parental_Education_Level (1,4%)
+
+Pozostałe zmienne w tej tabeli mają bardzo niewielką lub zerową liczbę braków.
+
+## Lewy panel (Proportion of missings)
+
+Lewy panel pokazuje proporcje braków dla każdej zmiennej. Wykres słupkowy wskazuje, że zmienne takie jak Sleep_Hours i Family_Income mają około 5% braków, podczas gdy pozostałe zmienne mają znacznie mniejszy udział braków lub wcale ich nie mają.
+
+## Prawy panel (Combinations)
+
+Prawy panel ilustruje współwystępowanie braków w zestawie danych. Każda kolumna to jedna zmienna. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozproszone i nie występują jednocześnie w wielu zmiennych.
+
+## Podsumowanie wniosków:
+
+Skala braków: Tylko kilka zmiennych ma zauważalne braki (Sleep_Hours, Family_Income), które należy uwzględnić w dalszej analizie (np. imputacja lub usunięcie wierszy z brakami).
+
+Brak współwystępowania braków: Z wykresu wynika, że brakujące dane nie są mocno powiązane między zmiennymi — brak jednych wartości nie oznacza automatycznie braków w innych.
+
+Czystość danych: Większość zmiennych w zestawie danych jest kompletna.
+
