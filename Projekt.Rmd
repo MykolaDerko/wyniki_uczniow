@@ -99,3 +99,14 @@ boxplot(data_new$Exam_Score)
 outliers5 <- boxplot.stats(data_new$Exam_Score)$out 
 print(outliers5)
 ```
+
+```{r}
+install.packages("outliers")
+library(outliers)
+grubbs.test(data_new$Hours_Studied)
+grubbs.test(data_new$Attendance)
+grubbs.test(data_new$Sleep_Hours)
+grubbs.test(data_new$Previous_Scores)
+grubbs.test(data_new$Tutoring_Sessions)
+grubbs.test(data_new$Exam_Score)
+```
