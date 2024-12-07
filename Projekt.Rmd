@@ -80,8 +80,7 @@ Brak współwystępowania braków: Z wykresu wynika, że brakujące dane nie są
 
 Czystość danych: Większość zmiennych w zestawie danych jest kompletna.
 
-
-```{r} 
+```{r include=FALSE}
 boxplot(data_new$Hours_Studied, main="Hours Studied") 
 outliers <- boxplot.stats(data_new$Hours_Studied)$out 
 print(outliers)
@@ -100,6 +99,16 @@ print(outliers4)
 boxplot(data_new$Exam_Score, main="Exam Score")
 outliers5 <- boxplot.stats(data_new$Exam_Score)$out 
 print(outliers5)
+```
+
+```{r}
+par(mfrow=c(2,3))
+boxplot(data_new$Hours_Studied, main="Hours Studied") 
+boxplot(data_new$Attendance, main="Attendance")
+boxplot(data_new$Sleep_Hours, main="Sllep Hours")
+boxplot(data_new$Previous_Scores, main="Previos Scores")
+boxplot(data_new$Tutoring_Sessions, main="Tutoring Sessions")
+boxplot(data_new$Exam_Score, main="Exam Score")
 ```
 
 ```{r}
