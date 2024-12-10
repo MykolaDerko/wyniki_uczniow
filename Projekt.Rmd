@@ -16,6 +16,8 @@ library(VIM)
 library(outliers)
 library(naniar)
 library(dplyr)
+library(hot.deck)
+library(dlookr)
 ```
 
 ```{r}
@@ -63,19 +65,42 @@ Czystość danych: Większość zmiennych w zestawie danych jest kompletna.
 
 
 ```{r}
-czynniki<- czynniki[!is.na(czynniki$Family_Income), ]
-czynniki<- czynniki[!is.na(czynniki$Parental_Education_Level), ]
-czynniki<- czynniki[!is.na(czynniki$Teacher_Quality), ]
-unique(czynniki$Family_Income)
-unique(czynniki$Parental_Education_Level)
-unique(czynniki$Teacher_Quality)
-glimpse(czynniki)
+czynniki1<- czynniki[!is.na(czynniki$Family_Income), ]
+czynniki2<- czynniki1[!is.na(czynniki1$Parental_Education_Level), ]
+czynniki3<- czynniki2[!is.na(czynniki2$Teacher_Quality), ]
+czynniki4<- czynniki3[!is.na(czynniki3$Distance_from_Home), ]
+unique(czynniki4$Family_Income)
+unique(czynniki4$Parental_Education_Level)
+unique(czynniki4$Teacher_Quality)
+unique(czynniki4$Distance_from_Home)
+glimpse(czynniki4)
+```
+```{r}
+gg_miss_upset(czynniki4)
+```
+```{r}
+aggr(czynniki4, numbers = TRUE, sortVars = TRUE)
 ```
 
 ```{r}
-
+as.numeric(czynniki4$Exam_Score)
+as.numeric(czynniki4$Sleep_Hours)
+czynniki5 <- hot.deck(czynniki4)
+print1(czynniki5$Sleep_Hours)
+print2(czynniki5$Exam_Score)
 ```
 
+```{r}
+miss_var_summary(czynniki4)
+```
+
+```{r}
+as.numeric(czynniki4$Exam_Score)
+as.numeric(czynniki4$Sleep_Hours)
+czynniki5 <- czynniki4
+czynniki5$Exam_Score<- imputate_outlier(czynniki5, Exam_Score)
+czynniki5$Sleep_Hours <- imputate_outlier(czynniki5, Sleep_Hours)
+```
 
 ```{r include=FALSE}
 boxplot(czynniki$Hours_Studied, main="Hours Studied") 
