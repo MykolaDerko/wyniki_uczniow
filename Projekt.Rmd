@@ -51,7 +51,7 @@ Lewy panel pokazuje proporcje braków dla każdej zmiennej. Wykres słupkowy wsk
 
 ## Prawy panel (Combinations)
 
-Prawy panel ilustruje współwystępowanie braków w zestawie danych. Każda kolumna to jedna zmienna. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozproszone i nie występują jednocześnie w wielu zmiennych.
+Prawy panel ilustruje współwystępowanie braków w zestawie danych. Każda kolumna to jedna zmienna. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozproszone i nie występują jednocześnie w wielu zmiennych.Oznacza to, że nie istnieje współzależność pomiędzy występowaniem braków więc dane brakujące będziemy uzupełniać za pomocą podobieństw.
 
 ## Podsumowanie wniosków:
 
@@ -106,6 +106,14 @@ boxplot(czynniki$Sleep_Hours, main="Sllep Hours")
 boxplot(czynniki$Previous_Scores, main="Previos Scores")
 boxplot(czynniki$Tutoring_Sessions, main="Tutoring Sessions")
 boxplot(czynniki$Exam_Score, main="Exam Score")
+par(mfrow=c(2,3)) #zmienić przy kolejnych wykresach na c(1,1) bo będzie pamiętać i tworzyć wykresy w blokach 6- wykresowych
+boxplot(data_new$Hours_Studied, main="Hours Studied") 
+boxplot(data_new$Attendance, main="Attendance")
+boxplot(data_new$Sleep_Hours, main="Sllep Hours")
+boxplot(data_new$Previous_Scores, main="Previos Scores")
+boxplot(data_new$Tutoring_Sessions, main="Tutoring Sessions")
+boxplot(data_new$Exam_Score, main="Exam Score")
+
 ```
 
 ```{r}
