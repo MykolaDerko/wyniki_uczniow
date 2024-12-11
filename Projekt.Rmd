@@ -8,6 +8,16 @@ output:
     downcute_theme: "default"
 ---
 
+# Wstęp
+
+## Opis problemu
+
+Problemem, który analizujemy w niniejszym projekcie jest wpływ poszczególnych czynników na wynik końcowy ucznia (?)
+
+## Baza danych
+
+Baza danych którą analizujemy nazywa się „Wyniki uczniów”. Znajduje się w niej 20 kolumn z danymi oraz 6.608 wierszy danych. W bazie danych znajdują się zarówno zmienne liczbowe jak i jakościowe.
+
 ```{r setup, include=FALSE}
 ## Global options
 knitr::opts_chunk$set(cache = TRUE)
@@ -24,45 +34,34 @@ library(dlookr)
 glimpse(czynniki)
 ```
 
+# Czyszczenie danych
+
+W niniejszym rozdziale sprawdzimy jakość danych, zbadamy występowanie braków danych oraz dobierzemy odpowiednią metodę imputacji brakujących danych (jeżeli zajdzie taka potrzeba).
+
+## Walidacja danych
+
+Zostało wykonane badanie danych za pomocą funkcji *aggr*. Wykres po lewej stronie prezentuje proporcje braków danych. W naszym przypadku największe braki występują w trzech zmiennych:
+
+-   Sleep Hours - 5,22%
+-   Exam Score - 4,37%
+-   Distance from Home - 1,01%
+
+Tabela po prawej stronie ilistruje współwystępowanie braków w zestawie danych. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozporoszone i nie występują jednocześnie w wielu zmiennych. Oznacza to, że nie instnieje współzależność pomiędzy występowaniem braków więc dane brakujące będziemy uzupełniać za pomocą podobieństwa.
+
 ```{r}
 aggr(czynniki, numbers = TRUE, sortVars = TRUE)
 ```
+
 ```{r}
 gg_miss_upset(czynniki)
 ```
 
-# WNIOSKI
+Wykres poniżej został stworzony za pomocą funkcji *gg_miss_upset*. Prezentuje on wartości liczbowe brakujących danych
 
-## Tabela 1.
+-   Family income – 309
+-   Sleep Hours – 300
 
-Tabela pokazuje szczegóły proporcji braków dla pierwszych zmiennych w zestawie danych.
-
-Najwięcej braków występuje w:
-
-Sleep_Hours (5,38%)
-
-Family_Income (5,15%)
-
-Parental_Education_Level (1,4%)
-
-Pozostałe zmienne w tej tabeli mają bardzo niewielką lub zerową liczbę braków.
-
-## Lewy panel (Proportion of missings)
-
-Lewy panel pokazuje proporcje braków dla każdej zmiennej. Wykres słupkowy wskazuje, że zmienne takie jak Sleep_Hours i Family_Income mają około 5% braków, podczas gdy pozostałe zmienne mają znacznie mniejszy udział braków lub wcale ich nie mają.
-
-## Prawy panel (Combinations)
-
-Prawy panel ilustruje współwystępowanie braków w zestawie danych. Każda kolumna to jedna zmienna. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozproszone i nie występują jednocześnie w wielu zmiennych.Oznacza to, że nie istnieje współzależność pomiędzy występowaniem braków więc dane brakujące będziemy uzupełniać za pomocą podobieństw.
-
-## Podsumowanie wniosków:
-
-Skala braków: Tylko kilka zmiennych ma zauważalne braki (Sleep_Hours, Family_Income), które należy uwzględnić w dalszej analizie (np. imputacja lub usunięcie wierszy z brakami).
-
-Brak współwystępowania braków: Z wykresu wynika, że brakujące dane nie są mocno powiązane między zmiennymi — brak jednych wartości nie oznacza automatycznie braków w innych.
-
-Czystość danych: Większość zmiennych w zestawie danych jest kompletna.
-
+Z uwagi na stosunkowo wysoką ilość braków dokonamy imputacji danych.
 
 ```{r}
 czynniki1<- czynniki[!is.na(czynniki$Family_Income), ]
@@ -75,12 +74,16 @@ unique(czynniki4$Teacher_Quality)
 unique(czynniki4$Distance_from_Home)
 glimpse(czynniki4)
 ```
+
 ```{r}
 gg_miss_upset(czynniki4)
 ```
+
 ```{r}
 aggr(czynniki4, numbers = TRUE, sortVars = TRUE)
 ```
+
+## Imputacja danych
 
 ```{r}
 as.numeric(czynniki4$Exam_Score)
