@@ -28,6 +28,7 @@ library(naniar)
 library(dplyr)
 library(hot.deck)
 library(dlookr)
+library(validate)
 ```
 
 ```{r}
@@ -101,54 +102,82 @@ miss_var_summary(czynniki4)
 as.numeric(czynniki4$Exam_Score)
 as.numeric(czynniki4$Sleep_Hours)
 czynniki5 <- czynniki4
-czynniki5$Exam_Score<- imputate_outlier(czynniki5, Exam_Score)
+czynniki5$Exam_Score <- imputate_outlier(czynniki5, Exam_Score)
 czynniki5$Sleep_Hours <- imputate_outlier(czynniki5, Sleep_Hours)
+```
+## Reguły walidacyjne
+
+```{r}
+reguły <- validator(
+Hours_Studied >= 0,
+Hours_Studied <= 168,
+Attendance >= 0, 
+Attendance <= 100,
+Sleep_Hours >= 0,
+Sleep_Hours <= 24, 
+Previous_Scores >= 0, 
+Previous_Scores <= 100, 
+Physical_Activity >= 0,
+Physical_Activity <= 168,
+Exam_Score >= 0,
+Exam_Score <= 100,
+Sleep_Hours * 7 + Hours_Studied + Physical_Activity >= 0,
+Sleep_Hours * 7 + Hours_Studied + Physical_Activity <= 168,
+)
+
+wyniki <- confront(czynniki5, reguły)
+summary(wyniki)
+plot(wyniki)
+
+dane_zwalidowane <- data$czynniki5 %>%
+  replace_errors(reguły)
+errors_removed(dane_zwalidowane)
 ```
 
 ```{r include=FALSE}
 boxplot(czynniki$Hours_Studied, main="Hours Studied") 
-outliers <- boxplot.stats(czynniki$Hours_Studied)$out 
+outliers <- boxplot.stats(dane_zwalidowane$Hours_Studied)$out 
 print(outliers)
 boxplot(czynniki$Attendance, main="Attendance")
-outliers1 <- boxplot.stats(czynniki$Attendance)$out 
+outliers1 <- boxplot.stats(dane_zwalidowane$Attendance)$out 
 print(outliers1)
 boxplot(czynniki$Sleep_Hours, main="Sllep Hours")
-outliers2 <- boxplot.stats(czynniki$Sllep_hours)$out 
+outliers2 <- boxplot.stats(dane_zwalidowane$Sllep_hours)$out 
 print(outliers2)
 boxplot(czynniki$Previous_Scores, main="Previos Scores")
-outliers3 <- boxplot.stats(czynniki$Previous_Scores)$out 
+outliers3 <- boxplot.stats(dane_zwalidowane$Previous_Scores)$out 
 print(outliers3)
 boxplot(czynniki$Tutoring_Sessions, main="Tutoring Sessions")
-outliers4 <- boxplot.stats(czynniki$Tutoring_Sessions)$out 
+outliers4 <- boxplot.stats(dane_zwalidowane$Tutoring_Sessions)$out 
 print(outliers4)
 boxplot(czynniki$Exam_Score, main="Exam Score")
-outliers5 <- boxplot.stats(czynniki$Exam_Score)$out 
+outliers5 <- boxplot.stats(dane_zwalidowane$Exam_Score)$out 
 print(outliers5)
 ```
 
 ```{r}
 par(mfrow=c(2,3))
-boxplot(czynniki$Hours_Studied, main="Hours Studied") 
-boxplot(czynniki$Attendance, main="Attendance")
-boxplot(czynniki$Sleep_Hours, main="Sllep Hours")
-boxplot(czynniki$Previous_Scores, main="Previos Scores")
-boxplot(czynniki$Tutoring_Sessions, main="Tutoring Sessions")
-boxplot(czynniki$Exam_Score, main="Exam Score")
+boxplot(dane_zwalidowane$Hours_Studied, main="Hours Studied") 
+boxplot(dane_zwalidowane$Attendance, main="Attendance")
+boxplot(dane_zwalidowane$Sleep_Hours, main="Sllep Hours")
+boxplot(dane_zwalidowane$Previous_Scores, main="Previos Scores")
+boxplot(dane_zwalidowane$Tutoring_Sessions, main="Tutoring Sessions")
+boxplot(dane_zwalidowane$Exam_Score, main="Exam Score")
 par(mfrow=c(2,3)) #zmienić przy kolejnych wykresach na c(1,1) bo będzie pamiętać i tworzyć wykresy w blokach 6- wykresowych
-boxplot(data_new$Hours_Studied, main="Hours Studied") 
-boxplot(data_new$Attendance, main="Attendance")
-boxplot(data_new$Sleep_Hours, main="Sllep Hours")
-boxplot(data_new$Previous_Scores, main="Previos Scores")
-boxplot(data_new$Tutoring_Sessions, main="Tutoring Sessions")
-boxplot(data_new$Exam_Score, main="Exam Score")
+boxplot(dane_zwalidowane$Hours_Studied, main="Hours Studied") 
+boxplot(dane_zwalidowane$Attendance, main="Attendance")
+boxplot(dane_zwalidowane$Sleep_Hours, main="Sllep Hours")
+boxplot(dane_zwalidowane$Previous_Scores, main="Previos Scores")
+boxplot(dane_zwalidowane$Tutoring_Sessions, main="Tutoring Sessions")
+boxplot(dane_zwalidowane$Exam_Score, main="Exam Score")
 
 ```
 
 ```{r}
-grubbs.test(czynniki$Hours_Studied)
-grubbs.test(czynniki$Attendance)
-grubbs.test(czynniki$Sleep_Hours)
-grubbs.test(czynniki$Previous_Scores)
-grubbs.test(czynniki$Tutoring_Sessions)
-grubbs.test(czynniki$Exam_Score)
+grubbs.test(dane_zwalidowane$Hours_Studied)
+grubbs.test(dane_zwalidowane$Attendance)
+grubbs.test(dane_zwalidowane$Sleep_Hours)
+grubbs.test(dane_zwalidowane$Previous_Scores)
+grubbs.test(dane_zwalidowane$Tutoring_Sessions)
+grubbs.test(dane_zwalidowane$Exam_Score)
 ```
