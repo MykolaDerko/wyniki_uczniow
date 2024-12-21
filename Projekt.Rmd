@@ -29,6 +29,7 @@ library(dplyr)
 library(hot.deck)
 library(dlookr)
 library(validate)
+library(errorlocate)
 ```
 
 ```{r}
@@ -89,26 +90,17 @@ aggr(czynniki4, numbers = TRUE, sortVars = TRUE)
 ```{r}
 as.numeric(czynniki4$Exam_Score)
 as.numeric(czynniki4$Sleep_Hours)
-czynniki5 <- hot.deck(czynniki4)
-print1(czynniki5$Sleep_Hours)
-print2(czynniki5$Exam_Score)
+czynniki5 <- hotdeck(czynniki4)
 ```
 
 ```{r}
-miss_var_summary(czynniki4)
+miss_var_summary(czynniki5)
 ```
 
-```{r}
-as.numeric(czynniki4$Exam_Score)
-as.numeric(czynniki4$Sleep_Hours)
-czynniki5 <- czynniki4
-czynniki5$Exam_Score <- imputate_outlier(czynniki5, Exam_Score)
-czynniki5$Sleep_Hours <- imputate_outlier(czynniki5, Sleep_Hours)
-```
 ## Reguły walidacyjne
 
 ```{r}
-reguły <- validator(
+rules <- validator(
 Hours_Studied >= 0,
 Hours_Studied <= 168,
 Attendance >= 0, 
@@ -122,15 +114,15 @@ Physical_Activity <= 168,
 Exam_Score >= 0,
 Exam_Score <= 100,
 Sleep_Hours * 7 + Hours_Studied + Physical_Activity >= 0,
-Sleep_Hours * 7 + Hours_Studied + Physical_Activity <= 168,
+Sleep_Hours * 7 + Hours_Studied + Physical_Activity <= 168
 )
 
-wyniki <- confront(czynniki5, reguły)
+wyniki <- confront(czynniki5, rules)
 summary(wyniki)
 plot(wyniki)
 
-dane_zwalidowane <- data$czynniki5 %>%
-  replace_errors(reguły)
+dane_zwalidowane <- czynniki5 %>%
+  replace_errors(rules)
 errors_removed(dane_zwalidowane)
 ```
 
