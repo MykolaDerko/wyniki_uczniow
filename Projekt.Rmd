@@ -30,6 +30,7 @@ library(hot.deck)
 library(dlookr)
 library(validate)
 library(errorlocate)
+library(datarium)
 ```
 
 ```{r}
@@ -163,6 +164,33 @@ boxplot(dane_zwalidowane$Previous_Scores, main="Previos Scores")
 boxplot(dane_zwalidowane$Tutoring_Sessions, main="Tutoring Sessions")
 boxplot(dane_zwalidowane$Exam_Score, main="Exam Score")
 
+```
+
+```{r warning=FALSE}
+ggplot(dane_zwalidowane, aes(x=Attendance)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
+ggplot(dane_zwalidowane, aes(x=Hours_Studied)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
+ggplot(dane_zwalidowane, aes(x=Sleep_Hours)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
+ggplot(dane_zwalidowane, aes(x=Previous_Scores)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
+ggplot(dane_zwalidowane, aes(x=Tutoring_Sessions)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
+ggplot(dane_zwalidowane, aes(x=Exam_Score)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
 ```
 
 ```{r}
