@@ -31,6 +31,7 @@ library(dlookr)
 library(validate)
 library(errorlocate)
 library(datarium)
+library(ggplot2)
 ```
 
 ```{r}
@@ -200,4 +201,59 @@ grubbs.test(dane_zwalidowane$Sleep_Hours)
 grubbs.test(dane_zwalidowane$Previous_Scores)
 grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
+```
+```{r}
+par(mfrow=c(1,2)) #dlaczego to nie działa? 
+ggplot(dane_zwalidowane, aes(x = Exam_Score))+
+  geom_histogram(binwidth =5, fill ="steelblue", color ="black")+
+  theme_minimal()+
+  labs(title ="Rozkład wyników egzaminów", x ="Wynik egzaminu", y ="Liczba uczniów")+
+  facet_grid(~Gender)
+ggplot(dane_zwalidowane, aes(x = Hours_Studied))+
+  geom_histogram(binwidth =5, fill ="darkgreen", color ="black")+
+  theme_minimal()+
+  labs(title ="Rozkład godzin nauki", x ="Godziny nauki w tygodniu", y="Liczba uczniów")+
+  facet_grid(~Gender)
+```
+
+```{r}
+ggplot(dane_zwalidowane, aes(x = Hours_Studied, y = Exam_Score))+
+  geom_point(color ="blue", alpha =0.6)+
+  geom_smooth(method ="lm", color ="red", se =FALSE)+
+  theme_minimal()+
+  labs(title ="Relacja między godzinami nauki a wynikiem egzaminu",
+       x ="Godziny nauki w tygodniu",
+       y ="Wynik egzaminu")
+```
+
+```{r}
+ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement))+
+  geom_boxplot()+
+  theme_minimal()+
+  labs(title ="Wyniki egzaminów w zależności od zaangażowania rodziców",
+       x ="Zaangażowanie rodziców",
+       y ="Wynik egzaminu")+
+  scale_fill_brewer(palette ="Set2")
+```
+
+```{r}
+# Wykres słupkowy typów szkół
+ggplot(dane_zwalidowane, aes(x = School_Type, fill = School_Type))+
+  geom_bar()+
+  theme_minimal()+
+  labs(title ="Rozkład typów szkół",
+       x ="Typ szkoły",
+       y ="Liczba uczniów")+
+  scale_fill_brewer(palette ="Set1")
+```
+
+```{r}
+ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement))+
+  geom_boxplot()+
+  facet_wrap(~ Motivation_Level)+
+  theme_minimal()+
+  labs(title ="Wyniki egzaminów w zależności od motywacji i zaangażowania rodziców",
+       x ="Zaangażowanie rodziców",
+       y ="Wynik egzaminu")+
+  scale_fill_brewer(palette ="Set3")
 ```
