@@ -202,6 +202,7 @@ grubbs.test(dane_zwalidowane$Previous_Scores)
 grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
 ```
+
 ```{r}
 par(mfrow=c(1,2)) #dlaczego to nie działa? 
 ggplot(dane_zwalidowane, aes(x = Exam_Score))+
@@ -228,7 +229,7 @@ ggplot(dane_zwalidowane, aes(x = Hours_Studied, y = Exam_Score))+
 
 ```{r}
 ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement))+
-  geom_boxplot()+
+  geom_violin()+
   theme_minimal()+
   labs(title ="Wyniki egzaminów w zależności od zaangażowania rodziców",
        x ="Zaangażowanie rodziców",
@@ -248,6 +249,16 @@ ggplot(dane_zwalidowane, aes(x = School_Type, fill = School_Type))+
 ```
 
 ```{r}
+ggplot(dane_zwalidowane, aes(x = School_Type, y = Exam_Score, fill = School_Type))+
+  geom_boxplot()+
+  theme_minimal()+
+  labs(title ="Wyniki egzaminów w zależności od typów szkół",
+       x ="Typ Szkoły",
+       y ="Wynik egzaminu")+
+  scale_fill_brewer(palette ="Set2")
+```
+
+```{r}
 ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement))+
   geom_boxplot()+
   facet_wrap(~ Motivation_Level)+
@@ -256,4 +267,14 @@ ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Pa
        x ="Zaangażowanie rodziców",
        y ="Wynik egzaminu")+
   scale_fill_brewer(palette ="Set3")
+```
+
+```{r}
+ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
+  geom_jitter(color = "purple", alpha = 0.5) +
+  geom_smooth(method = "lm", color = "orange", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Relacja między godzinami snu a wynikiem egzaminu",
+       x = "Godziny snu",
+       y = "Wynik egzaminu")
 ```
