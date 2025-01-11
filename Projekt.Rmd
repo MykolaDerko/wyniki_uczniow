@@ -32,6 +32,7 @@ library(validate)
 library(errorlocate)
 library(datarium)
 library(ggplot2)
+library(gridExtra)
 ```
 
 ```{r}
@@ -204,17 +205,17 @@ grubbs.test(dane_zwalidowane$Exam_Score)
 ```
 
 ```{r}
-par(mfrow=c(1,2)) #dlaczego to nie działa? 
-ggplot(dane_zwalidowane, aes(x = Exam_Score))+
+ w1 <- ggplot(dane_zwalidowane, aes(x = Exam_Score))+
   geom_histogram(binwidth =5, fill ="steelblue", color ="black")+
   theme_minimal()+
   labs(title ="Rozkład wyników egzaminów", x ="Wynik egzaminu", y ="Liczba uczniów")+
   facet_grid(~Gender)
-ggplot(dane_zwalidowane, aes(x = Hours_Studied))+
+w2 <-ggplot(dane_zwalidowane, aes(x = Hours_Studied))+
   geom_histogram(binwidth =5, fill ="darkgreen", color ="black")+
   theme_minimal()+
   labs(title ="Rozkład godzin nauki", x ="Godziny nauki w tygodniu", y="Liczba uczniów")+
   facet_grid(~Gender)
+grid.arrange(w1, w2, nrow = 1)
 ```
 
 ```{r}
