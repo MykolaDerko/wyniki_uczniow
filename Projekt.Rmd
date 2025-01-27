@@ -34,6 +34,7 @@ library(datarium)
 library(ggplot2)
 library(gridExtra)
 library(hexbin)
+library(knitr)
 ```
 
 ```{r}
@@ -204,6 +205,7 @@ grubbs.test(dane_zwalidowane$Previous_Scores)
 grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
 ```
+
 ```{r}
 ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
   geom_bar()+
@@ -212,6 +214,7 @@ ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
   ggtitle("Podział płci w próbie")+
   theme(plot.title = element_text(hjust =0.5))
 ```
+
 ```{r}
 ggplot(dane_zwalidowane, aes(x = Exam_Score, fill = Exam_Score))+
   geom_histogram(binwidth =5,fill="#5C1C81", color ="black")+
@@ -285,6 +288,7 @@ ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Pa
        y ="Wynik egzaminu")+
   scale_fill_brewer(palette ="Set3")
 ```
+
 ```{r}
 ggplot(dane_zwalidowane, aes(x = Access_to_Resources, y = Exam_Score, fill = Access_to_Resources))+
   geom_boxplot()+
@@ -295,6 +299,7 @@ ggplot(dane_zwalidowane, aes(x = Access_to_Resources, y = Exam_Score, fill = Acc
        y ="Wynik egzaminu")+
   scale_fill_brewer(palette ="Set5")
 ```
+
 ```{r}
 ggplot(dane_zwalidowane, aes(x = Exam_Score))+
   geom_histogram(binwidth =5, fill ="steelblue", color ="black")+
@@ -302,6 +307,7 @@ ggplot(dane_zwalidowane, aes(x = Exam_Score))+
   labs(title ="Rozkład wyników egzaminów", x ="Wynik egzaminu", y ="Liczba uczniów")+
   facet_grid(~Learning_Disabilities)
 ```
+
 ```{r}
 # Wykres heksagonalny
 ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
@@ -315,7 +321,6 @@ ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
     fill = "Gęstość"
   )
 ```
-
 
 ```{r}
 ld_counts <- dane_zwalidowane %>%
@@ -334,6 +339,62 @@ ggplot(ld_counts, aes(x ="", y = n, fill = Learning_Disabilities))+
 ```
 
 ```{r}
+ggplot(dane_zwalidowane, aes(x = Exam_Score))+
+  geom_histogram(binwidth =5, fill ="darkred", color ="black")+
+  theme_minimal()+
+  labs(title ="Rozkład wyników egzaminów", x ="Wynik egzaminu", y ="Poziom wykształcenia rodziców")+
+  facet_grid(~Parental_Education_Level)
+```
+
+```{r}
+# Upewniamy się, że kategorie są w poprawnej kolejności
+dane_zwalidowane$Teacher_Quality <- factor(dane_zwalidowane$Teacher_Quality, levels =c("Low","Medium","High"))# Obliczenie mediany wyników egzaminów dla każdej kategorii jakości nauczycieli
+median_scores <- dane_zwalidowane %>%
+  group_by(Teacher_Quality)%>%
+  summarise(Median_Exam_Score = median(Exam_Score, na.rm =TRUE))# Wykres liniowy z medianą
+ggplot(median_scores, aes(x = Teacher_Quality, y = Median_Exam_Score, group =1))+
+  geom_line(color ="#ff6347", size =1)+# Linia wykresu
+  geom_point(color ="darkred", size =3)+# Punkty oznaczające medianę
+  geom_text(aes(label =round(Median_Exam_Score,1)), vjust =-1)+# Etykiety mediany
+  ylim(0,100)+# Skala od 0 do 100
+  theme_minimal()+
+  ggtitle("Mediana wyniku egzaminu a jakość nauczycieli")+
+  xlab("Jakość nauczycieli")+
+  ylab("Mediana wyniku egzaminu")+
+  theme(plot.title = element_text(hjust =0.5))
+```
+
+```{r warning=FALSE}
+ggplot(dane_zwalidowane, aes(x = Family_Income, y = Tutoring_Sessions, color = Family_Income)) +
+  geom_jitter(width = 0.2, alpha = 0.7) + # Dodanie punktów z małym zakłóceniem na osi X (w celu uniknięcia nakładania punktów)
+  geom_smooth(method = "lm", se = FALSE, color = "black") + # Linia trendu (regresji liniowej)
+  scale_color_manual(values = c("High" = "lightgreen", "Medium" = "lightblue", "Low" = "lightpink")) +
+  theme_minimal() +
+  labs(
+    title = "Wpływ dochodów rodziny na liczbę korepetycji",
+    x = "Dochód rodziny",
+    y = "Liczba korepetycji",
+    color = "Dochód"
+  )
+```
+
+```{r}
+ld_counts <- dane_zwalidowane %>%
+  count(Family_Income)%>%
+  mutate(Percentage =round(n /sum(n)*100,1))# Zaokrąglamy do 1 miejsca po przecinku# Tworzenie wykresu kołowego
+ggplot(ld_counts, aes(x ="", y = n, fill = Family_Income))+
+  geom_bar(stat ="identity", width =1)+
+  coord_polar("y", start =0)+
+  scale_fill_manual(values =c("Low"="lightpink","Medium"="lightblue","High"="lightgreen"))+
+  theme_void()+
+  ggtitle("Poziom dochodów rodziców")+
+  theme(plot.title = element_text(hjust =0.5))+
+  geom_text(aes(label = paste0(Percentage,"%")), 
+            position = position_stack(vjust =0.5), 
+            color ="black", size =5)
+```
+
+```{r warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
   geom_jitter(color = "purple", alpha = 0.5) +
   geom_smooth(method = "lm", color = "orange", se = TRUE) +
