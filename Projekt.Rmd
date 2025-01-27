@@ -33,6 +33,7 @@ library(errorlocate)
 library(datarium)
 library(ggplot2)
 library(gridExtra)
+library(hexbin)
 ```
 
 ```{r}
@@ -203,6 +204,21 @@ grubbs.test(dane_zwalidowane$Previous_Scores)
 grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
 ```
+```{r}
+ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
+  geom_bar()+
+  scale_fill_manual(values =c("Female"="pink","Male"="lightblue"))+
+  theme_minimal()+
+  ggtitle("Podział płci w próbie")+
+  theme(plot.title = element_text(hjust =0.5))
+```
+```{r}
+ggplot(dane_zwalidowane, aes(x = Exam_Score, fill = Exam_Score))+
+  geom_histogram(binwidth =5,fill="#5C1C81", color ="black")+
+  theme_minimal()+
+  ggtitle("Rozkład wyników egzaminów")+
+  theme(plot.title = element_text(hjust =0.5))
+```
 
 ```{r}
  w1 <- ggplot(dane_zwalidowane, aes(x = Exam_Score))+
@@ -268,6 +284,53 @@ ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Pa
        x ="Zaangażowanie rodziców",
        y ="Wynik egzaminu")+
   scale_fill_brewer(palette ="Set3")
+```
+```{r}
+ggplot(dane_zwalidowane, aes(x = Access_to_Resources, y = Exam_Score, fill = Access_to_Resources))+
+  geom_boxplot()+
+  facet_wrap(~ Internet_Access)+
+  theme_minimal()+
+  labs(title ="Wyniki egzaminów w zależności od dostępu do źródeł i internetu",
+       x ="Dostęp do źródeł",
+       y ="Wynik egzaminu")+
+  scale_fill_brewer(palette ="Set5")
+```
+```{r}
+ggplot(dane_zwalidowane, aes(x = Exam_Score))+
+  geom_histogram(binwidth =5, fill ="steelblue", color ="black")+
+  theme_minimal()+
+  labs(title ="Rozkład wyników egzaminów", x ="Wynik egzaminu", y ="Liczba uczniów")+
+  facet_grid(~Learning_Disabilities)
+```
+```{r}
+# Wykres heksagonalny
+ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
+  geom_hex(bins = 30) + # Liczba przedziałów (możesz dostosować np. 20, 40)
+  scale_fill_viridis_c() + # Kolorystyka dla lepszej wizualizacji
+  theme_minimal() +
+  labs(
+    title = "Zależność między wynikiem egzaminu a dystansem od domu",
+    x = "Dystans od domu do szkoły",
+    y = "Wynik Egzaminu",
+    fill = "Gęstość"
+  )
+```
+
+
+```{r}
+ld_counts <- dane_zwalidowane %>%
+  count(Learning_Disabilities)%>%
+  mutate(Percentage =round(n /sum(n)*100,1))# Zaokrąglamy do 1 miejsca po przecinku# Tworzenie wykresu kołowego
+ggplot(ld_counts, aes(x ="", y = n, fill = Learning_Disabilities))+
+  geom_bar(stat ="identity", width =1)+
+  coord_polar("y", start =0)+
+  scale_fill_manual(values =c("Yes"="red","No"="lightblue"))+
+  theme_void()+
+  ggtitle("Udział osób z trudnościami w uczeniu się")+
+  theme(plot.title = element_text(hjust =0.5))+
+  geom_text(aes(label = paste0(Percentage,"%")), 
+            position = position_stack(vjust =0.5), 
+            color ="black", size =5)
 ```
 
 ```{r}
