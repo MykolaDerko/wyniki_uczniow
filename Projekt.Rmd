@@ -35,6 +35,8 @@ library(ggplot2)
 library(gridExtra)
 library(hexbin)
 library(knitr)
+library(gt)
+library(corrplot)
 ```
 
 ```{r}
@@ -402,4 +404,134 @@ ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
   labs(title = "Relacja między godzinami snu a wynikiem egzaminu",
        x = "Godziny snu",
        y = "Wynik egzaminu")
+```
+```{r}
+# Ładowanie potrzebnych pakietów
+library(dplyr)
+library(gt)
+library(tidyr)
+
+# Używamy Twojego zbioru danych
+data <- dane_zwalidowane
+
+# Wyliczenie statystyk opisowych dla zmiennej Hours_Studied
+stat_desc <- data %>%
+  summarise(
+    średnia = mean(Hours_Studied, na.rm = TRUE),
+    mediana = median(Hours_Studied, na.rm = TRUE),
+    odchylenie_standardowe = sd(Hours_Studied, na.rm = TRUE),
+    minimum = min(Hours_Studied, na.rm = TRUE),
+    maksimum = max(Hours_Studied, na.rm = TRUE)
+  ) %>%
+  pivot_longer(
+    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    names_to = "Statystyka",
+    values_to = "Wartość"
+  ) %>%
+  mutate(zmienna = "Hours_Studied")  # Dodanie kolumny z nazwą zmiennej
+
+# Tworzenie efektownej tabeli za pomocą gt
+stat_desc %>%
+  gt() %>%
+  tab_header(
+    title = "Statystyki Opisowe: Hours_Studied",
+    subtitle = "Podstawowe miary zmiennej"
+  ) %>%
+  fmt_number(
+    columns = Wartość,
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = Wartość,
+    colors = scales::col_numeric(
+      palette = c("purple", "pink", "lightblue"),
+      domain = NULL
+    )
+  ) %>%
+  cols_label(
+    zmienna = "Zmienna",
+    Statystyka = "Rodzaj statystyki",
+    Wartość = "Wartość"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
+```
+
+```{r}
+ 
+# 1. Podstawowe informacje o danych
+cat("Liczba rekordów:", nrow(dane_zwalidowane), "\n")
+cat("Liczba zmiennych:", ncol(dane_zwalidowane), "\n")
+ 
+# 2. Statystyki opisowe dla zmiennych ilościowych
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Family_Income, Physical_Activity, Exam_Score)
+ 
+statystyki_opisowe <- zmienne_ilosciowe %>%
+  summarise_all(list(
+    Średnia = ~mean(., na.rm = TRUE),
+    Mediana = ~median(., na.rm = TRUE),
+    Odchylenie_std = ~sd(., na.rm = TRUE),
+    Min = ~min(., na.rm = TRUE),
+    Max = ~max(., na.rm = TRUE)
+  ))
+ 
+print(statystyki_opisowe)
+ 
+# 3. Rozkład zmiennych jakościowych
+zmienne_jakosciowe <- dane_zwalidowane %>%
+  select(Parental_Involvement, Access_to_Resources, Extracurricular_Activities, 
+         Motivation_Level, Internet_Access, Teacher_Quality, 
+         School_Type, Peer_Influence, Learning_Disabilities, Gender)
+str(zmienne_jakosciowe)
+rozklad_jakosciowe <- zmienne_jakosciowe %>%
+  summarise_all(~prop.table(table(.)) * 100)
+ 
+print(rozklad_jakosciowe)
+ 
+# 4. Macierz korelacji dla zmiennych ilościowych
+macierz_korelacji <- cor(zmienne_ilosciowe, use = "complete.obs")
+print(macierz_korelacji)
+ 
+# Wizualizacja macierzy korelacji
+corrplot(macierz_korelacji, method = "circle", type = "upper", 
+         tl.col = "black", tl.srt = 45, col = colorRampPalette(c("blue", "white", "red"))(200))
+ 
+# 5. Wizualizacje pomocnicze
+# Rozkład wyniku egzaminu
+ggplot(dane, aes(x = Exam_Score)) +
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "black") +
+  labs(title = "Rozkład wyniku egzaminu", x = "Wynik egzaminu", y = "Liczba uczniów")
+ 
+# Wykres pudełkowy: Wynik egzaminu vs. poziom zaangażowania rodziców
+ggplot(dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement)) +
+  geom_boxplot() +
+  labs(title = "Wynik egzaminu w zależności od zaangażowania rodziców", 
+       x = "Poziom zaangażowania rodziców", y = "Wynik egzaminu") +
+  theme_minimal()
+ 
+# Wynik egzaminu vs. czas nauki
+ggplot(dane, aes(x = Hours_Studied, y = Exam_Score)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Zależność między godzinami nauki a wynikiem egzaminu", 
+       x = "Liczba godzin nauki", y = "Wynik egzaminu") +
+  theme_minimal()
+ 
+# Wynik egzaminu vs. motywacja
+ggplot(dane, aes(x = Motivation_Level, y = Exam_Score, fill = Motivation_Level)) +
+  geom_boxplot() +
+  labs(title = "Wynik egzaminu w zależności od poziomu motywacji", 
+       x = "Poziom motywacji", y = "Wynik egzaminu") +
+  theme_minimal()
+ 
+# Wynik egzaminu vs. trudności w uczeniu się
+ggplot(dane, aes(x = Learning_Disabilities, y = Exam_Score, fill = Learning_Disabilities)) +
+  geom_boxplot() +
+  labs(title = "Wynik egzaminu w zależności od trudności w uczeniu się", 
+       x = "Trudności w uczeniu się", y = "Wynik egzaminu") +
+  theme_minimal()
 ```
