@@ -37,6 +37,7 @@ library(hexbin)
 library(knitr)
 library(gt)
 library(corrplot)
+library(tidyr)
 ```
 
 ```{r}
@@ -405,15 +406,14 @@ ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
        x = "Godziny snu",
        y = "Wynik egzaminu")
 ```
+
 ```{r}
-# Ładowanie potrzebnych pakietów
-library(dplyr)
-library(gt)
-library(tidyr)
-
 # Używamy Twojego zbioru danych
-data <- dane_zwalidowane
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Physical_Activity, Exam_Score)
 
+data <- zmienne_ilosciowe
 # Wyliczenie statystyk opisowych dla zmiennej Hours_Studied
 stat_desc <- data %>%
   summarise(
@@ -427,15 +427,13 @@ stat_desc <- data %>%
     cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
     names_to = "Statystyka",
     values_to = "Wartość"
-  ) %>%
-  mutate(zmienna = "Hours_Studied")  # Dodanie kolumny z nazwą zmiennej
-
+  ) 
 # Tworzenie efektownej tabeli za pomocą gt
 stat_desc %>%
   gt() %>%
   tab_header(
-    title = "Statystyki Opisowe: Hours_Studied",
-    subtitle = "Podstawowe miary zmiennej"
+    title = "Statystyki Opisowe:",
+    subtitle = "Hours_Studied"
   ) %>%
   fmt_number(
     columns = Wartość,
@@ -449,7 +447,56 @@ stat_desc %>%
     )
   ) %>%
   cols_label(
-    zmienna = "Zmienna",
+    Statystyka = "Rodzaj statystyki",
+    Wartość = "Wartość"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
+```
+ 
+```{r}
+# Używamy Twojego zbioru danych
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Physical_Activity, Exam_Score)
+
+data <- zmienne_ilosciowe
+# Wyliczenie statystyk opisowych dla zmiennej Attendance
+stat_desc <- data %>%
+  summarise(
+    średnia = mean(Attendance, na.rm = TRUE),
+    mediana = median(Attendance, na.rm = TRUE),
+    odchylenie_standardowe = sd(Attendance, na.rm = TRUE),
+    minimum = min(Attendance, na.rm = TRUE),
+    maksimum = max(Attendance, na.rm = TRUE)
+  ) %>%
+  pivot_longer(
+    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    names_to = "Statystyka",
+    values_to = "Wartość"
+  ) 
+
+# Tworzenie efektownej tabeli za pomocą gt
+stat_desc %>%
+  gt() %>%
+  tab_header(
+    title = "Statystyki Opisowe:",
+    subtitle = "Attendance"
+  ) %>%
+  fmt_number(
+    columns = Wartość,
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = Wartość,
+    colors = scales::col_numeric(
+      palette = c("purple", "pink", "lightblue"),
+      domain = NULL
+    )
+  ) %>%
+  cols_label(
     Statystyka = "Rodzaj statystyki",
     Wartość = "Wartość"
   ) %>%
@@ -459,6 +506,203 @@ stat_desc %>%
   )
 ```
 
+
+```{r}
+# Używamy Twojego zbioru danych
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Physical_Activity, Exam_Score)
+
+data <- zmienne_ilosciowe
+# Wyliczenie statystyk opisowych dla zmiennej Sleep_Hours
+stat_desc <- data %>%
+  summarise(
+    średnia = mean(Sleep_Hours, na.rm = TRUE),
+    mediana = median(Sleep_Hours, na.rm = TRUE),
+    odchylenie_standardowe = sd(Sleep_Hours, na.rm = TRUE),
+    minimum = min(Sleep_Hours, na.rm = TRUE),
+    maksimum = max(Sleep_Hours, na.rm = TRUE)
+  ) %>%
+  pivot_longer(
+    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    names_to = "Statystyka",
+    values_to = "Wartość"
+  ) 
+# Tworzenie efektownej tabeli za pomocą gt
+stat_desc %>%
+  gt() %>%
+  tab_header(
+    title = "Statystyki Opisowe:",
+    subtitle = "Sleep_Hours"
+  ) %>%
+  fmt_number(
+    columns = Wartość,
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = Wartość,
+    colors = scales::col_numeric(
+      palette = c("purple", "pink", "lightblue"),
+      domain = NULL
+    )
+  ) %>%
+  cols_label(
+    Statystyka = "Rodzaj statystyki",
+    Wartość = "Wartość"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
+```
+
+```{r}
+# Używamy Twojego zbioru danych
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Physical_Activity, Exam_Score)
+
+data <- zmienne_ilosciowe
+# Wyliczenie statystyk opisowych dla zmiennej Tutoring_Sessions
+stat_desc <- data %>%
+  summarise(
+    średnia = mean(Tutoring_Sessions, na.rm = TRUE),
+    mediana = median(Tutoring_Sessions, na.rm = TRUE),
+    odchylenie_standardowe = sd(Tutoring_Sessions, na.rm = TRUE),
+    minimum = min(Tutoring_Sessions, na.rm = TRUE),
+    maksimum = max(Tutoring_Sessions, na.rm = TRUE)
+  ) %>%
+  pivot_longer(
+    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    names_to = "Statystyka",
+    values_to = "Wartość"
+  ) 
+# Tworzenie efektownej tabeli za pomocą gt
+stat_desc %>%
+  gt() %>%
+  tab_header(
+    title = "Statystyki Opisowe:",
+    subtitle = "Tutoring_Sessions"
+  ) %>%
+  fmt_number(
+    columns = Wartość,
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = Wartość,
+    colors = scales::col_numeric(
+      palette = c("purple", "pink", "lightblue"),
+      domain = NULL
+    )
+  ) %>%
+  cols_label(
+    Statystyka = "Rodzaj statystyki",
+    Wartość = "Wartość"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
+```
+
+```{r}
+# Używamy Twojego zbioru danych
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Physical_Activity, Exam_Score)
+
+data <- zmienne_ilosciowe
+# Wyliczenie statystyk opisowych dla zmiennej Physical_Activity
+stat_desc <- data %>%
+  summarise(
+    średnia = mean(Physical_Activity, na.rm = TRUE),
+    mediana = median(Physical_Activity, na.rm = TRUE),
+    odchylenie_standardowe = sd(Physical_Activity, na.rm = TRUE),
+    minimum = min(Physical_Activity, na.rm = TRUE),
+    maksimum = max(Physical_Activity, na.rm = TRUE)
+  ) %>%
+  pivot_longer(
+    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    names_to = "Statystyka",
+    values_to = "Wartość"
+  ) 
+
+# Tworzenie efektownej tabeli za pomocą gt
+stat_desc %>%
+  gt() %>%
+  tab_header(
+    title = "Statystyki Opisowe:",
+    subtitle = "Physical_Activity"
+  ) %>%
+  fmt_number(
+    columns = Wartość,
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = Wartość,
+    colors = scales::col_numeric(
+      palette = c("purple", "pink", "lightblue"),
+      domain = NULL
+    )
+  ) %>%
+  cols_label(
+    Statystyka = "Rodzaj statystyki",
+    Wartość = "Wartość"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
+```
+```{r}
+# Używamy Twojego zbioru danych
+zmienne_ilosciowe <- dane_zwalidowane %>%
+  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
+         Tutoring_Sessions, Physical_Activity, Exam_Score)
+
+data <- zmienne_ilosciowe
+# Wyliczenie statystyk opisowych dla zmiennej PExam_Score
+stat_desc <- data %>%
+  summarise(
+    średnia = mean(Exam_Score, na.rm = TRUE),
+    mediana = median(Exam_Score, na.rm = TRUE),
+    odchylenie_standardowe = sd(Exam_Score, na.rm = TRUE),
+    minimum = min(Exam_Score, na.rm = TRUE),
+    maksimum = max(Exam_Score, na.rm = TRUE)
+  ) %>%
+  pivot_longer(
+    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    names_to = "Statystyka",
+    values_to = "Wartość"
+  ) 
+
+# Tworzenie efektownej tabeli za pomocą gt
+stat_desc %>%
+  gt() %>%
+  tab_header(
+    title = "Statystyki Opisowe:",
+    subtitle = "Exam_Score"
+  ) %>%
+  fmt_number(
+    columns = Wartość,
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = Wartość,
+    colors = scales::col_numeric(
+      palette = c("purple", "pink", "lightblue"),
+      domain = NULL
+    )
+  ) %>%
+  cols_label(
+    Statystyka = "Rodzaj statystyki",
+    Wartość = "Wartość"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  )
+```
 ```{r}
  
  
@@ -478,3 +722,6 @@ corrplot(macierz_korelacji, method = "circle", type = "upper",
          tl.col = "black", tl.srt = 45, col = colorRampPalette(c("blue", "white", "red"))(200))
 
 ```
+
+
+
