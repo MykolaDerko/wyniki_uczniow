@@ -409,7 +409,7 @@ ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
 ```
 
 ```{r}
-# Używamy Twojego zbioru danych
+
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
@@ -429,7 +429,7 @@ stat_desc <- data %>%
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
-# Tworzenie efektownej tabeli za pomocą gt
+
 stat_desc %>%
   gt() %>%
   tab_header(
@@ -458,7 +458,7 @@ stat_desc %>%
 ```
  
 ```{r}
-# Używamy Twojego zbioru danych
+
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
@@ -479,7 +479,7 @@ stat_desc <- data %>%
     values_to = "Wartość"
   ) 
 
-# Tworzenie efektownej tabeli za pomocą gt
+
 stat_desc %>%
   gt() %>%
   tab_header(
@@ -509,7 +509,7 @@ stat_desc %>%
 
 
 ```{r}
-# Używamy Twojego zbioru danych
+
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
@@ -529,7 +529,7 @@ stat_desc <- data %>%
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
-# Tworzenie efektownej tabeli za pomocą gt
+
 stat_desc %>%
   gt() %>%
   tab_header(
@@ -558,7 +558,7 @@ stat_desc %>%
 ```
 
 ```{r}
-# Używamy Twojego zbioru danych
+
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
@@ -578,7 +578,7 @@ stat_desc <- data %>%
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
-# Tworzenie efektownej tabeli za pomocą gt
+
 stat_desc %>%
   gt() %>%
   tab_header(
@@ -607,7 +607,7 @@ stat_desc %>%
 ```
 
 ```{r}
-# Używamy Twojego zbioru danych
+
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
@@ -628,7 +628,7 @@ stat_desc <- data %>%
     values_to = "Wartość"
   ) 
 
-# Tworzenie efektownej tabeli za pomocą gt
+
 stat_desc %>%
   gt() %>%
   tab_header(
@@ -656,13 +656,13 @@ stat_desc %>%
   )
 ```
 ```{r}
-# Używamy Twojego zbioru danych
+
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej PExam_Score
+# Wyliczenie statystyk opisowych dla zmiennej Exam_Score
 stat_desc <- data %>%
   summarise(
     średnia = mean(Exam_Score, na.rm = TRUE),
@@ -677,7 +677,7 @@ stat_desc <- data %>%
     values_to = "Wartość"
   ) 
 
-# Tworzenie efektownej tabeli za pomocą gt
+
 stat_desc %>%
   gt() %>%
   tab_header(
@@ -723,6 +723,4 @@ corrplot(macierz_korelacji, method = "circle", type = "upper",
          tl.col = "black", tl.srt = 45, col = colorRampPalette(c("blue", "white", "red"))(200))
 
 ```
-
-
 
