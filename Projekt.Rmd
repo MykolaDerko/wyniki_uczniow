@@ -20,7 +20,7 @@ Baza danych którą analizujemy nazywa się „Wyniki uczniów”. Znajduje się
 
 ```{r setup, include=FALSE}
 ## Global options
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE)
 library(tidyverse)
 library(VIM)
 library(outliers)
@@ -38,9 +38,10 @@ library(knitr)
 library(gt)
 library(corrplot)
 library(tidyr)
+library(ggstatsplot)
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 czynniki <- read.csv("czynniki.csv")
 glimpse(czynniki)
 ```
@@ -724,3 +725,31 @@ corrplot(macierz_korelacji, method = "circle", type = "upper",
 
 ```
 
+```{r}
+ dane_zwalidowane %>%
+   filter(Learning_Disabilities %in% c("Yes", "No")) %>%
+   ggbetweenstats(
+     y=Exam_Score,
+     x=Learning_Disabilities
+   )
+```
+
+```{r}
+ dane_zwalidowane %>%
+   filter(Extracurricular_Activities %in% c("Yes", "No")) %>%
+   ggbetweenstats(
+     y=Exam_Score,
+     x=Extracurricular_Activities
+   )
+```
+
+```{r}
+set.seed(123)
+  gghistostats(
+  data       = dane_zwalidowane,
+  x          = Attendance,
+  title      = "Wpływ frekwencji na wynik egzaminu",
+  test.value = 12,
+  binwidth   = 1
+)
+```
