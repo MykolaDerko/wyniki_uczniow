@@ -41,6 +41,7 @@ library(tidyr)
 ```
 
 ```{r}
+czynniki <- read.csv("czynniki.csv")
 glimpse(czynniki)
 ```
 
