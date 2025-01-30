@@ -77,7 +77,7 @@ Wykres poniżej został stworzony za pomocą funkcji *gg_miss_upset*. Prezentuje
 
 Z uwagi na stosunkowo wysoką ilość braków dokonamy imputacji danych.
 
-```{r echo=TRUE, warning=FALSE}
+```{r warning=FALSE, include=FALSE}
 czynniki1<- czynniki[!is.na(czynniki$Family_Income), ]
 czynniki2<- czynniki1[!is.na(czynniki1$Parental_Education_Level), ]
 czynniki3<- czynniki2[!is.na(czynniki2$Teacher_Quality), ]
@@ -101,13 +101,13 @@ aggr(czynniki4, numbers = TRUE, sortVars = TRUE)
 
 Dokonujemy imputacji danych dla zmiennych *Exam_score* oraz *Sleep_hours* za pomocą komendy *hotdeck*. Następnie za pomocą komendy *miss_var_summary* sprawdzamy, czy imputacja zakończyła się powodzeniem. W naszym przypadku tak się stało, więc możemy przejśc do następnego kroku.
 
-```{r}
+```{r warning=FALSE, include=FALSE}
 as.numeric(czynniki4$Exam_Score)
 as.numeric(czynniki4$Sleep_Hours)
 czynniki5 <- hotdeck(czynniki4)
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 miss_var_summary(czynniki5)
 ```
 
@@ -129,7 +129,7 @@ W nineijszym rodziale tworzymy reguły walidacyjne, aby zapewnić poprawność i
 
 Jak widać na poniższym wykresie walidacja została zakończona sukcesem.
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 rules <- validator(
 Hours_Studied >= 0,
 Hours_Studied <= 168,
@@ -337,7 +337,7 @@ ggplot(dane_zwalidowane, aes(x = School_Type, fill = School_Type))+
 
 Poniższy wykres pudełkowy prezentuje rozkład wyników w zależności od typu szkoły. Jak widać mediana (pogrubiona kreska) dla obu typów szkół znajduje się w okolicach wartości 67. Jednak widać różnice w rozstępie międzykwartylowym. Dla szkół prywatnych mieści się on w przedziale 65-70, a dla szkół publicznych 65-68. W szkołach prywatnych widać większy rozstęp wartości- występują wartości od 56 do 100, a dla szkół publicznych od 57 do 99.
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = School_Type, y = Exam_Score, fill = School_Type))+
   geom_boxplot()+
   theme_minimal()+
@@ -362,7 +362,7 @@ ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Pa
   scale_fill_brewer(palette ="Set3")
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Access_to_Resources, y = Exam_Score, fill = Access_to_Resources))+
   geom_boxplot()+
   facet_wrap(~ Internet_Access)+
