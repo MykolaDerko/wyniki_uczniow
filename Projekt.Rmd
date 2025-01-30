@@ -20,11 +20,7 @@ Baza danych którą analizujemy nazywa się „Wyniki uczniów”. Znajduje się
 
 ```{r setup, include=FALSE}
 ## Global options
-knitr::opts_chunk$set(
-	warning = FALSE,
-	cache = TRUE,
-	include = FALSE
-)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE)
 library(tidyverse)
 library(VIM)
 library(outliers)
