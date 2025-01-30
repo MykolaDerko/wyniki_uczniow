@@ -20,7 +20,12 @@ Baza danych którą analizujemy nazywa się „Wyniki uczniów”. Znajduje się
 
 ```{r setup, include=FALSE}
 ## Global options
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE)
+knitr::opts_chunk$set(
+	eval = FALSE,
+	warning = FALSE,
+	cache = TRUE,
+	include = FALSE
+)
 library(tidyverse)
 library(VIM)
 library(outliers)
@@ -37,12 +42,9 @@ library(hexbin)
 library(knitr)
 library(gt)
 library(corrplot)
-library(tidyr)
-library(ggstatsplot)
 ```
 
-```{r echo=FALSE, warning=FALSE}
-czynniki <- read.csv("czynniki.csv")
+```{r warning=FALSE, include=FALSE}
 glimpse(czynniki)
 ```
 
@@ -60,11 +62,11 @@ Zostało wykonane badanie danych za pomocą funkcji *aggr*. Wykres po lewej stro
 
 Tabela po prawej stronie ilistruje współwystępowanie braków w zestawie danych. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozporoszone i nie występują jednocześnie w wielu zmiennych. Oznacza to, że nie instnieje współzależność pomiędzy występowaniem braków więc dane brakujące będziemy uzupełniać za pomocą podobieństwa.
 
-```{r}
+```{r warning=FALSE, include=FALSE}
 aggr(czynniki, numbers = TRUE, sortVars = TRUE)
 ```
 
-```{r}
+```{r warning=FALSE, include=FALSE}
 gg_miss_upset(czynniki)
 ```
 
@@ -75,7 +77,7 @@ Wykres poniżej został stworzony za pomocą funkcji *gg_miss_upset*. Prezentuje
 
 Z uwagi na stosunkowo wysoką ilość braków dokonamy imputacji danych.
 
-```{r}
+```{r echo=TRUE, warning=FALSE}
 czynniki1<- czynniki[!is.na(czynniki$Family_Income), ]
 czynniki2<- czynniki1[!is.na(czynniki1$Parental_Education_Level), ]
 czynniki3<- czynniki2[!is.na(czynniki2$Teacher_Quality), ]
@@ -87,15 +89,17 @@ unique(czynniki4$Distance_from_Home)
 glimpse(czynniki4)
 ```
 
-```{r}
+```{r warning=FALSE, include=FALSE}
 gg_miss_upset(czynniki4)
 ```
 
-```{r}
+```{r warning=FALSE, include=FALSE}
 aggr(czynniki4, numbers = TRUE, sortVars = TRUE)
 ```
 
 ## Imputacja danych
+
+Dokonujemy imputacji danych dla zmiennych *Exam_score* oraz *Sleep_hours* za pomocą komendy *hotdeck*. Następnie za pomocą komendy *miss_var_summary* sprawdzamy, czy imputacja zakończyła się powodzeniem. W naszym przypadku tak się stało, więc możemy przejśc do następnego kroku.
 
 ```{r}
 as.numeric(czynniki4$Exam_Score)
@@ -109,7 +113,23 @@ miss_var_summary(czynniki5)
 
 ## Reguły walidacyjne
 
-```{r}
+W nineijszym rodziale tworzymy reguły walidacyjne, aby zapewnić poprawność i spójność danych. Stosujemy poniższe reguły:
+
+-   Wartość zmiennej *Hours_Studied* musi mieścić się w przedziale od 0 do 168 (poniważ pokazuje ona ilość godzin spędzanych na nauce tygodniowo)
+
+-   Wartość zmiennej *Phisical_Activity* musi mieścić się w przedziale od 0 do 168 (poniważ pokazuje ona ilość godzin spędzanych na aktywności fizycznej tygodniowo)
+
+-   Wartość zmiennej *Sleep_Hous* musi mieścić się w przedziale od 0 do 24 (ponieważ pokazuje ona ilość przesanych godzin dziennie)
+
+-   Wartość zmiennej *Attendance* musi mieścić się w przedziale od 0 do 10 (poniważ jest wartością procentową)
+
+-   Wartość zmiennej *Previos_Scores* musi mieścić się w przedziale od 0 do 10 (poniważ jest wartością procentową)
+
+-   Wynik równania *Sleep_Hours* \* 7 + *Hours_Studied* + *Phisical_Activity* musi zawierać się w przedziale od 0 do 168 (mnożymy średnią dzienną ilość snu \* 7, aby uzyskć wartośc tygodniową oraz dodajemy tygodniową ilość nauki oraz aktywności fizycznej, a następnie nakazujemy aby wartość była dodatnia, lecz mniejsza niż ilość godzin w tygodniu)
+
+Jak widać na poniższym wykresie walidacja została zakończona sukcesem.
+
+```{r echo=FALSE}
 rules <- validator(
 Hours_Studied >= 0,
 Hours_Studied <= 168,
@@ -136,7 +156,11 @@ dane_zwalidowane <- czynniki5 %>%
 errors_removed(dane_zwalidowane)
 ```
 
-```{r include=FALSE}
+## Wartości odstające
+
+W tym rodziale za pomocą wykresów pudełkowych przestawiliśmy wartości odstające. Jak widać na poniższych wykresach zdarzają się wartości odstające. Szczeglnie w zmiennych *Exam_Score* oraz *Tutoring_Sessions*.
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
 boxplot(czynniki$Hours_Studied, main="Hours Studied") 
 outliers <- boxplot.stats(dane_zwalidowane$Hours_Studied)$out 
 print(outliers)
@@ -157,7 +181,7 @@ outliers5 <- boxplot.stats(dane_zwalidowane$Exam_Score)$out
 print(outliers5)
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 par(mfrow=c(2,3))
 boxplot(dane_zwalidowane$Hours_Studied, main="Hours Studied") 
 boxplot(dane_zwalidowane$Attendance, main="Attendance")
@@ -175,7 +199,7 @@ boxplot(dane_zwalidowane$Exam_Score, main="Exam Score")
 
 ```
 
-```{r warning=FALSE}
+```{r eval=FALSE, warning=FALSE, include=FALSE}
 ggplot(dane_zwalidowane, aes(x=Attendance)) +
   geom_boxplot() +
   theme_bw() +
@@ -202,7 +226,23 @@ ggplot(dane_zwalidowane, aes(x=Exam_Score)) +
   coord_flip()
 ```
 
-```{r}
+Za pomocą komendy *grubbs.test* przeprowadziliśmy test Grubbsa, który służy do wykrywania pojedyńczych wartości odstających w zbiorze danych.
+
+Interpretacja:
+
+-   dla zmiennej *Hours_Studied* - brak odstających wartości
+
+-   dla zmiennej *Attendance* - brak odstających wartości
+
+-   dla zmiennej *Sleep_Hours* - brak odstających wartości
+
+-   dla zmiennej *Previous_Scores* - brak odstających wartości
+
+-   dla zmiennej *Tutoring_Sessions* - wartość 8 jest istotnie odstająca, lecz realna, więc nie zostanie usunięta ze zbioru danych
+
+-   dla zmiennej *Exam_Score* - wartość 100 jest istotnie odstającac, lecz realna, więc nie zostanie usunięta ze zbioru danych
+
+```{r echo=FALSE, warning=FALSE}
 grubbs.test(dane_zwalidowane$Hours_Studied)
 grubbs.test(dane_zwalidowane$Attendance)
 grubbs.test(dane_zwalidowane$Sleep_Hours)
@@ -211,7 +251,11 @@ grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
 ```
 
-```{r}
+# Analiza danych 
+
+Jak widać na wykresie poniżej, w próbce dominują mężczyźni. W zbiorze znajduje się 42 % kobiet oraz 58 % mężczyzn.
+
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
   geom_bar()+
   scale_fill_manual(values =c("Female"="pink","Male"="lightblue"))+
@@ -220,7 +264,9 @@ ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
   theme(plot.title = element_text(hjust =0.5))
 ```
 
-```{r}
+Jak widać na załączonym histogramie rozkładu zmiennej *Exam_Score* większość wyników egzaminów mieści się w zakresie 60-75 punktów. Najwięcej studentów uzyskało wynik 65-70 punktów. Wyniki powyżej 80 punktów są rzadkością.
+
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Exam_Score, fill = Exam_Score))+
   geom_histogram(binwidth =5,fill="#5C1C81", color ="black")+
   theme_minimal()+
@@ -228,7 +274,11 @@ ggplot(dane_zwalidowane, aes(x = Exam_Score, fill = Exam_Score))+
   theme(plot.title = element_text(hjust =0.5))
 ```
 
-```{r}
+Na wykresie po lewej (kolor niebiski) przedawiono wyniki egzaminów z podziałem na płcie. Zarowno kobiety, jak i mężczyni w większości uzyskiwali wyniki w zakresie 60-75 punktów. W przypadku mężczyzn widać więcej wyników w górnej części skali (powyżej 75), lecz nie są to duże różnice. Wyniki powyżej 80 punktów są rzzadkością w obu grupach.
+
+Wykres po prawej (kolor zielony) pokazuje ilość godzin poświęconych na naukę tygodniowo w podziale na płcie. W obu grupach większość uczy się 15-25 godzin tygodniowo. Nauka powyżej 40 godzin tygodiowo jest żadkością w obu grupach.
+
+```{r echo=FALSE, warning=FALSE}
  w1 <- ggplot(dane_zwalidowane, aes(x = Exam_Score))+
   geom_histogram(binwidth =5, fill ="steelblue", color ="black")+
   theme_minimal()+
@@ -242,7 +292,9 @@ w2 <-ggplot(dane_zwalidowane, aes(x = Hours_Studied))+
 grid.arrange(w1, w2, nrow = 1)
 ```
 
-```{r}
+Poniższy wykres rozrzutu przestawia relację między zmienną *Hours_Studied* a *Exam_Score*. Czerowna linia regresji sugeruje lekkko poytywną korelację - więcej godzin nauki często wiąże się z lepszym wynikiem. Widzimy, że większość studentów uczy się od 5 do 30 godzin tygodniowo i osiąga wyniki z przedziału 60-80.
+
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Hours_Studied, y = Exam_Score))+
   geom_point(color ="blue", alpha =0.6)+
   geom_smooth(method ="lm", color ="red", se =FALSE)+
@@ -252,7 +304,15 @@ ggplot(dane_zwalidowane, aes(x = Hours_Studied, y = Exam_Score))+
        y ="Wynik egzaminu")
 ```
 
-```{r}
+Prezentowany poniżej wykres wiolinowy pokazuje zależność pomiędzy zmienną *Parental_Involvment* a *Exam_Score*. W zbiorze zaanagażowanie rodziców określone jest w 3 stopniach - *Low*, *Medium* oraz *High*.
+
+-   wysokie zaangażowanie rodziców - wyniki są z reguły wyższe niż w innych grupach, najczęściej występują wartości z przedziału 65-70
+
+-   średnie zaangażowanie rodziców - wyniki skupiają się w przedziale 65-70, lecz na wysokości 70 wykres jest węższy niż dla grupy z wysokim zaangażowaniem
+
+-   niskie zaangażowanie rodziców - wyniki skupiają się w okolicy wartości 65 i osiągają niższe wartości niż dwie pozostałe grupy
+
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement))+
   geom_violin()+
   theme_minimal()+
@@ -262,7 +322,9 @@ ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Pa
   scale_fill_brewer(palette ="Set2")
 ```
 
-```{r}
+Poniższy wykres słupkowy pokazuje typ szkół do których uczęszczają badani. Zdecydowana większość próbki uczęszcza do publicznych placówek edukacyjnych.
+
+```{r echo=FALSE, warning=FALSE}
 # Wykres słupkowy typów szkół
 ggplot(dane_zwalidowane, aes(x = School_Type, fill = School_Type))+
   geom_bar()+
@@ -272,6 +334,8 @@ ggplot(dane_zwalidowane, aes(x = School_Type, fill = School_Type))+
        y ="Liczba uczniów")+
   scale_fill_brewer(palette ="Set1")
 ```
+
+Poniższy wykres pudełkowy prezentuje rozkład wyników w zależności od typu szkoły. Jak widać mediana (pogrubiona kreska) dla obu typów szkół znajduje się w okolicach wartości 67. Jednak widać różnice w rozstępie międzykwartylowym. Dla szkół prywatnych mieści się on w przedziale 65-70, a dla szkół publicznych 65-68. W szkołach prywatnych widać większy rozstęp wartości- występują wartości od 56 do 100, a dla szkół publicznych od 57 do 99.
 
 ```{r}
 ggplot(dane_zwalidowane, aes(x = School_Type, y = Exam_Score, fill = School_Type))+
@@ -283,7 +347,11 @@ ggplot(dane_zwalidowane, aes(x = School_Type, y = Exam_Score, fill = School_Type
   scale_fill_brewer(palette ="Set2")
 ```
 
-```{r}
+Poniższe wykresy typu Boxplot pokazują zależności pomiędzy zmiennymi *Parental_Involvement*, *Motivation_Level* a *Exam_Scores*.
+
+Interpretacja: Wyniki egzaminów są najwyższe wśród uczniów z wysoką motywacją, niezależnie od zaangażowania rodziców, choć wysokie zaangażowanie rodziców korzystnie wpływa na stabilność wyników. W grupie uczniów o niskiej i średniej motywacji wysokie zaangażowanie rodziców istotnie poprawia wyniki, podczas gdy niskie zaangazowanie skutkuje niższymi rezultatami. Rozrzut wyników jest większy w przypadku niskiej motywacji, co wskazuje na większe zróźnicowanie osiągnięć w tych grupach.
+
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement))+
   geom_boxplot()+
   facet_wrap(~ Motivation_Level)+
@@ -410,12 +478,14 @@ ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
 ```
 
 ```{r}
+# Ładowanie potrzebnych pakietów
+library(dplyr)
+library(gt)
+library(tidyr)
 
-zmienne_ilosciowe <- dane_zwalidowane %>%
-  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
+# Używamy Twojego zbioru danych
+data <- dane_zwalidowane
 
-data <- zmienne_ilosciowe
 # Wyliczenie statystyk opisowych dla zmiennej Hours_Studied
 stat_desc <- data %>%
   summarise(
@@ -429,13 +499,15 @@ stat_desc <- data %>%
     cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
     names_to = "Statystyka",
     values_to = "Wartość"
-  ) 
+  ) %>%
+  mutate(zmienna = "Hours_Studied")  # Dodanie kolumny z nazwą zmiennej
 
+# Tworzenie efektownej tabeli za pomocą gt
 stat_desc %>%
   gt() %>%
   tab_header(
-    title = "Statystyki Opisowe:",
-    subtitle = "Hours_Studied"
+    title = "Statystyki Opisowe: Hours_Studied",
+    subtitle = "Podstawowe miary zmiennej"
   ) %>%
   fmt_number(
     columns = Wartość,
@@ -449,56 +521,7 @@ stat_desc %>%
     )
   ) %>%
   cols_label(
-    Statystyka = "Rodzaj statystyki",
-    Wartość = "Wartość"
-  ) %>%
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_column_labels()
-  )
-```
- 
-```{r}
-
-zmienne_ilosciowe <- dane_zwalidowane %>%
-  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
-
-data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Attendance
-stat_desc <- data %>%
-  summarise(
-    średnia = mean(Attendance, na.rm = TRUE),
-    mediana = median(Attendance, na.rm = TRUE),
-    odchylenie_standardowe = sd(Attendance, na.rm = TRUE),
-    minimum = min(Attendance, na.rm = TRUE),
-    maksimum = max(Attendance, na.rm = TRUE)
-  ) %>%
-  pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
-    names_to = "Statystyka",
-    values_to = "Wartość"
-  ) 
-
-
-stat_desc %>%
-  gt() %>%
-  tab_header(
-    title = "Statystyki Opisowe:",
-    subtitle = "Attendance"
-  ) %>%
-  fmt_number(
-    columns = Wartość,
-    decimals = 2
-  ) %>%
-  data_color(
-    columns = Wartość,
-    colors = scales::col_numeric(
-      palette = c("purple", "pink", "lightblue"),
-      domain = NULL
-    )
-  ) %>%
-  cols_label(
+    zmienna = "Zmienna",
     Statystyka = "Rodzaj statystyki",
     Wartość = "Wartość"
   ) %>%
@@ -508,248 +531,79 @@ stat_desc %>%
   )
 ```
 
-
-```{r}
-
-zmienne_ilosciowe <- dane_zwalidowane %>%
-  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
-
-data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Sleep_Hours
-stat_desc <- data %>%
-  summarise(
-    średnia = mean(Sleep_Hours, na.rm = TRUE),
-    mediana = median(Sleep_Hours, na.rm = TRUE),
-    odchylenie_standardowe = sd(Sleep_Hours, na.rm = TRUE),
-    minimum = min(Sleep_Hours, na.rm = TRUE),
-    maksimum = max(Sleep_Hours, na.rm = TRUE)
-  ) %>%
-  pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
-    names_to = "Statystyka",
-    values_to = "Wartość"
-  ) 
-
-stat_desc %>%
-  gt() %>%
-  tab_header(
-    title = "Statystyki Opisowe:",
-    subtitle = "Sleep_Hours"
-  ) %>%
-  fmt_number(
-    columns = Wartość,
-    decimals = 2
-  ) %>%
-  data_color(
-    columns = Wartość,
-    colors = scales::col_numeric(
-      palette = c("purple", "pink", "lightblue"),
-      domain = NULL
-    )
-  ) %>%
-  cols_label(
-    Statystyka = "Rodzaj statystyki",
-    Wartość = "Wartość"
-  ) %>%
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_column_labels()
-  )
-```
-
-```{r}
-
-zmienne_ilosciowe <- dane_zwalidowane %>%
-  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
-
-data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Tutoring_Sessions
-stat_desc <- data %>%
-  summarise(
-    średnia = mean(Tutoring_Sessions, na.rm = TRUE),
-    mediana = median(Tutoring_Sessions, na.rm = TRUE),
-    odchylenie_standardowe = sd(Tutoring_Sessions, na.rm = TRUE),
-    minimum = min(Tutoring_Sessions, na.rm = TRUE),
-    maksimum = max(Tutoring_Sessions, na.rm = TRUE)
-  ) %>%
-  pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
-    names_to = "Statystyka",
-    values_to = "Wartość"
-  ) 
-
-stat_desc %>%
-  gt() %>%
-  tab_header(
-    title = "Statystyki Opisowe:",
-    subtitle = "Tutoring_Sessions"
-  ) %>%
-  fmt_number(
-    columns = Wartość,
-    decimals = 2
-  ) %>%
-  data_color(
-    columns = Wartość,
-    colors = scales::col_numeric(
-      palette = c("purple", "pink", "lightblue"),
-      domain = NULL
-    )
-  ) %>%
-  cols_label(
-    Statystyka = "Rodzaj statystyki",
-    Wartość = "Wartość"
-  ) %>%
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_column_labels()
-  )
-```
-
-```{r}
-
-zmienne_ilosciowe <- dane_zwalidowane %>%
-  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
-
-data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Physical_Activity
-stat_desc <- data %>%
-  summarise(
-    średnia = mean(Physical_Activity, na.rm = TRUE),
-    mediana = median(Physical_Activity, na.rm = TRUE),
-    odchylenie_standardowe = sd(Physical_Activity, na.rm = TRUE),
-    minimum = min(Physical_Activity, na.rm = TRUE),
-    maksimum = max(Physical_Activity, na.rm = TRUE)
-  ) %>%
-  pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
-    names_to = "Statystyka",
-    values_to = "Wartość"
-  ) 
-
-
-stat_desc %>%
-  gt() %>%
-  tab_header(
-    title = "Statystyki Opisowe:",
-    subtitle = "Physical_Activity"
-  ) %>%
-  fmt_number(
-    columns = Wartość,
-    decimals = 2
-  ) %>%
-  data_color(
-    columns = Wartość,
-    colors = scales::col_numeric(
-      palette = c("purple", "pink", "lightblue"),
-      domain = NULL
-    )
-  ) %>%
-  cols_label(
-    Statystyka = "Rodzaj statystyki",
-    Wartość = "Wartość"
-  ) %>%
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_column_labels()
-  )
-```
-```{r}
-
-zmienne_ilosciowe <- dane_zwalidowane %>%
-  select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
-
-data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Exam_Score
-stat_desc <- data %>%
-  summarise(
-    średnia = mean(Exam_Score, na.rm = TRUE),
-    mediana = median(Exam_Score, na.rm = TRUE),
-    odchylenie_standardowe = sd(Exam_Score, na.rm = TRUE),
-    minimum = min(Exam_Score, na.rm = TRUE),
-    maksimum = max(Exam_Score, na.rm = TRUE)
-  ) %>%
-  pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
-    names_to = "Statystyka",
-    values_to = "Wartość"
-  ) 
-
-
-stat_desc %>%
-  gt() %>%
-  tab_header(
-    title = "Statystyki Opisowe:",
-    subtitle = "Exam_Score"
-  ) %>%
-  fmt_number(
-    columns = Wartość,
-    decimals = 2
-  ) %>%
-  data_color(
-    columns = Wartość,
-    colors = scales::col_numeric(
-      palette = c("purple", "pink", "lightblue"),
-      domain = NULL
-    )
-  ) %>%
-  cols_label(
-    Statystyka = "Rodzaj statystyki",
-    Wartość = "Wartość"
-  ) %>%
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_column_labels()
-  )
-```
 ```{r}
  
+# 1. Podstawowe informacje o danych
+cat("Liczba rekordów:", nrow(dane_zwalidowane), "\n")
+cat("Liczba zmiennych:", ncol(dane_zwalidowane), "\n")
  
-# Statystyki opisowe dla zmiennych ilościowych
+# 2. Statystyki opisowe dla zmiennych ilościowych
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
-         Tutoring_Sessions, Physical_Activity, Exam_Score)
-
-
+         Tutoring_Sessions, Family_Income, Physical_Activity, Exam_Score)
  
-#. Macierz korelacji dla zmiennych ilościowych
+statystyki_opisowe <- zmienne_ilosciowe %>%
+  summarise_all(list(
+    Średnia = ~mean(., na.rm = TRUE),
+    Mediana = ~median(., na.rm = TRUE),
+    Odchylenie_std = ~sd(., na.rm = TRUE),
+    Min = ~min(., na.rm = TRUE),
+    Max = ~max(., na.rm = TRUE)
+  ))
+ 
+print(statystyki_opisowe)
+ 
+# 3. Rozkład zmiennych jakościowych
+zmienne_jakosciowe <- dane_zwalidowane %>%
+  select(Parental_Involvement, Access_to_Resources, Extracurricular_Activities, 
+         Motivation_Level, Internet_Access, Teacher_Quality, 
+         School_Type, Peer_Influence, Learning_Disabilities, Gender)
+str(zmienne_jakosciowe)
+rozklad_jakosciowe <- zmienne_jakosciowe %>%
+  summarise_all(~prop.table(table(.)) * 100)
+ 
+print(rozklad_jakosciowe)
+ 
+# 4. Macierz korelacji dla zmiennych ilościowych
 macierz_korelacji <- cor(zmienne_ilosciowe, use = "complete.obs")
 print(macierz_korelacji)
  
 # Wizualizacja macierzy korelacji
 corrplot(macierz_korelacji, method = "circle", type = "upper", 
          tl.col = "black", tl.srt = 45, col = colorRampPalette(c("blue", "white", "red"))(200))
-
-```
-
-```{r}
- dane_zwalidowane %>%
-   filter(Learning_Disabilities %in% c("Yes", "No")) %>%
-   ggbetweenstats(
-     y=Exam_Score,
-     x=Learning_Disabilities
-   )
-```
-
-```{r}
- dane_zwalidowane %>%
-   filter(Extracurricular_Activities %in% c("Yes", "No")) %>%
-   ggbetweenstats(
-     y=Exam_Score,
-     x=Extracurricular_Activities
-   )
-```
-
-```{r}
-set.seed(123)
-  gghistostats(
-  data       = dane_zwalidowane,
-  x          = Attendance,
-  title      = "Wpływ frekwencji na wynik egzaminu",
-  test.value = 12,
-  binwidth   = 1
-)
+ 
+# 5. Wizualizacje pomocnicze
+# Rozkład wyniku egzaminu
+ggplot(dane, aes(x = Exam_Score)) +
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "black") +
+  labs(title = "Rozkład wyniku egzaminu", x = "Wynik egzaminu", y = "Liczba uczniów")
+ 
+# Wykres pudełkowy: Wynik egzaminu vs. poziom zaangażowania rodziców
+ggplot(dane, aes(x = Parental_Involvement, y = Exam_Score, fill = Parental_Involvement)) +
+  geom_boxplot() +
+  labs(title = "Wynik egzaminu w zależności od zaangażowania rodziców", 
+       x = "Poziom zaangażowania rodziców", y = "Wynik egzaminu") +
+  theme_minimal()
+ 
+# Wynik egzaminu vs. czas nauki
+ggplot(dane, aes(x = Hours_Studied, y = Exam_Score)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Zależność między godzinami nauki a wynikiem egzaminu", 
+       x = "Liczba godzin nauki", y = "Wynik egzaminu") +
+  theme_minimal()
+ 
+# Wynik egzaminu vs. motywacja
+ggplot(dane, aes(x = Motivation_Level, y = Exam_Score, fill = Motivation_Level)) +
+  geom_boxplot() +
+  labs(title = "Wynik egzaminu w zależności od poziomu motywacji", 
+       x = "Poziom motywacji", y = "Wynik egzaminu") +
+  theme_minimal()
+ 
+# Wynik egzaminu vs. trudności w uczeniu się
+ggplot(dane, aes(x = Learning_Disabilities, y = Exam_Score, fill = Learning_Disabilities)) +
+  geom_boxplot() +
+  labs(title = "Wynik egzaminu w zależności od trudności w uczeniu się", 
+       x = "Trudności w uczeniu się", y = "Wynik egzaminu") +
+  theme_minimal()
 ```
