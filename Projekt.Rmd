@@ -1,5 +1,5 @@
 ---
-title: "Projekt"
+title: "Wpływ poszczególnych czynników na wynik testu końcowego."
 date: "`r Sys.Date()`"
 output:
   rmdformats::downcute:
