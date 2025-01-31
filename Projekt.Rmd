@@ -12,7 +12,7 @@ output:
 
 ## Opis problemu
 
-Problemem, który analizujemy w niniejszym projekcie jest wpływ poszczególnych czynników na wynik końcowy ucznia (?)
+Problemem, który analizujemy w niniejszym projekcie jest wpływ poszczególnych czynników na wynik testu końcowego.
 
 ## Baza danych
 
@@ -20,7 +20,11 @@ Baza danych którą analizujemy nazywa się „Wyniki uczniów”. Znajduje się
 
 ```{r setup, include=FALSE}
 ## Global options
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE)
+knitr::opts_chunk$set(
+	warning = FALSE,
+	cache = TRUE,
+	include = FALSE
+)
 library(tidyverse)
 library(VIM)
 library(outliers)
@@ -58,20 +62,21 @@ Zostało wykonane badanie danych za pomocą funkcji *aggr*. Wykres po lewej stro
 
 Tabela po prawej stronie ilistruje współwystępowanie braków w zestawie danych. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozporoszone i nie występują jednocześnie w wielu zmiennych. Oznacza to, że nie instnieje współzależność pomiędzy występowaniem braków więc dane brakujące będziemy uzupełniać za pomocą podobieństwa.
 
-```{r warning=FALSE, include=FALSE}
+```{r echo=FALSE, warning=FALSE}
 aggr(czynniki, numbers = TRUE, sortVars = TRUE)
-```
-
-```{r warning=FALSE, include=FALSE}
-gg_miss_upset(czynniki)
 ```
 
 Wykres poniżej został stworzony za pomocą funkcji *gg_miss_upset*. Prezentuje on wartości liczbowe brakujących danych
 
 -   Family income – 309
 -   Sleep Hours – 300
+-   Exam Score - 257
 
-Z uwagi na stosunkowo wysoką ilość braków dokonamy imputacji danych.
+Zdecydowaliśmy się na usunięcie braków ze zmiennych jakościowych z uwagi na ich niewielki udział w próbie.
+
+```{r echo=FALSE, warning=FALSE}
+gg_miss_upset(czynniki)
+```
 
 ```{r warning=FALSE, include=FALSE}
 czynniki1<- czynniki[!is.na(czynniki$Family_Income), ]
@@ -85,11 +90,13 @@ unique(czynniki4$Distance_from_Home)
 glimpse(czynniki4)
 ```
 
-```{r warning=FALSE, include=FALSE}
+Wykresy poniżej prezentują braki danych w zmiennych ilościowych (dokonamy imputacji w późniejszych rozdziałach pracy), ale po usunięciu braków ze zmiennych jakościowych.
+
+```{r echo=FALSE, warning=FALSE}
 gg_miss_upset(czynniki4)
 ```
 
-```{r warning=FALSE, include=FALSE}
+```{r echo=FALSE, warning=FALSE}
 aggr(czynniki4, numbers = TRUE, sortVars = TRUE)
 ```
 
@@ -246,6 +253,7 @@ grubbs.test(dane_zwalidowane$Previous_Scores)
 grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
 ```
+
 # Analiza i wizualizacja danych
 
 Jak widać na wykresie poniżej, w próbce dominują mężczyźni. W zbiorze znajduje się 42 % kobiet oraz 58 % mężczyzn.
@@ -369,7 +377,9 @@ ggplot(dane_zwalidowane, aes(x = Access_to_Resources, y = Exam_Score, fill = Acc
        y ="Wynik egzaminu")+
   scale_fill_brewer(palette ="Set5")
 ```
-Poniższy wykres rozrzutu przestawia relację między zmienną *Previous_Score* a *Exam_Score*. Różowa linia regresji sugeruje lekkko poytywną korelację - wyższy wynik z wcześniejszych egzaminów może delikatnie pozytywnie wpływać na lepszy wynik egzaminu końcowego. Rozkład jest równomierny, większość obserwacji jest zbliżona do osi. 
+
+Poniższy wykres rozrzutu przestawia relację między zmienną *Previous_Score* a *Exam_Score*. Różowa linia regresji sugeruje lekkko poytywną korelację - wyższy wynik z wcześniejszych egzaminów może delikatnie pozytywnie wpływać na lepszy wynik egzaminu końcowego. Rozkład jest równomierny, większość obserwacji jest zbliżona do osi.
+
 ```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Previous_Scores, y = Exam_Score))+
   geom_point(color ="purple", alpha =0.6)+
@@ -396,11 +406,13 @@ ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
   )
 ```
 
-Poniższy diagram kołowy prezentuje rozkład zmiennej *Learning_Disabilities* 
-* 10,5 % badanej próbki posiada trudności w uczeniu się 
-* 89,5 % badanej próbki nie posiada trudności w nauce 
+Poniższy diagram kołowy prezentuje rozkład zmiennej *Learning_Disabilities*
 
-```{r}
+-   10,5 % badanej próbki posiada trudności w uczeniu się
+
+-    89,5 % badanej próbki nie posiada trudności w nauce
+
+```{r echo=FALSE, warning=FALSE}
 ld_counts <- dane_zwalidowane %>%
   count(Learning_Disabilities)%>%
   mutate(Percentage =round(n /sum(n)*100,1))# Zaokrąglamy do 1 miejsca po przecinku# Tworzenie wykresu kołowego
@@ -416,13 +428,17 @@ ggplot(ld_counts, aes(x ="", y = n, fill = Learning_Disabilities))+
             color ="black", size =5)
 ```
 
-Poniższy wykres słupkowy przedstawia zależność między zmienną *Parental_Education_Level* a *Exam_Score*. Wnioski: 
-* Największa liczba uczniów pochodzi z rodzin, w których rodzice mają wykształcenie średnie (High School) – w tej grupie słupki są najwyższe.
-* Rozkład wyników jest podobny dla każdej grupy – wyniki oscylują głównie w przedziale 60-75 punktów.
-* Rodzice z wyższym wykształceniem (Postgraduate, College) – ich dzieci osiągają nieco wyższe wyniki w porównaniu do grupy "High School".
-* Wysokie wyniki (90-100 punktów) są rzadkie – niezależnie od poziomu wykształcenia rodziców, liczba uczniów z bardzo wysokimi wynikami jest niewielka.
+Poniższy wykres słupkowy przedstawia zależność między zmienną *Parental_Education_Level* a *Exam_Score*. Wnioski:
 
-```{r}
+-   Największa liczba uczniów pochodzi z rodzin, w których rodzice mają wykształcenie średnie (High School) – w tej grupie słupki są najwyższe.
+
+-   Rozkład wyników jest podobny dla każdej grupy – wyniki oscylują głównie w przedziale 60-75 punktów.
+
+-   Rodzice z wyższym wykształceniem (Postgraduate, College) – ich dzieci osiągają nieco wyższe wyniki w porównaniu do grupy "High School".
+
+-   Wysokie wyniki (90-100 punktów) są rzadkie – niezależnie od poziomu wykształcenia rodziców, liczba uczniów z bardzo wysokimi wynikami jest niewielka.
+
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Exam_Score))+
   geom_histogram(binwidth =5, fill ="darkred", color ="black")+
   theme_minimal()+
@@ -452,7 +468,7 @@ ggplot(median_scores, aes(x = Teacher_Quality, y = Median_Exam_Score, group =1))
 
 Wykres poniżej ukazuje relacje między zmienną *Family_Income* (wyrażony w wartościach *Low*, *Medium* oraz *High*) a *Tuttoring_Sessions* (wartości z zakresu 0-8). Jak widać na wykresie nie ma wyraźnych zależności pomiędzy dochodem rodziny, a ilością korepetycji.
 
-```{r warning=FALSE}
+```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Family_Income, y = Tutoring_Sessions, color = Family_Income)) +
   geom_jitter(width = 0.2, alpha = 0.7) + # Dodanie punktów z małym zakłóceniem na osi X (w celu uniknięcia nakładania punktów)
   geom_smooth(method = "lm", se = FALSE, color = "black") + # Linia trendu (regresji liniowej)
@@ -468,11 +484,11 @@ ggplot(dane_zwalidowane, aes(x = Family_Income, y = Tutoring_Sessions, color = F
 
 Poniższy wykres kołowy pokazuje procentowy podział zmiennej *Family_Income*.
 
--    19,2% należy do kategorii *High*, czyli wysokie dochody rodziny
+-   19,2% należy do kategorii *High*, czyli wysokie dochody rodziny
 
--    40,3% należy do kategorii *Medium*, czyli średnie dochody rodziny
+-   40,3% należy do kategorii *Medium*, czyli średnie dochody rodziny
 
--    40,5% należy do kategorii *Low*, czyli niskie dochody rodziny
+-   40,5% należy do kategorii *Low*, czyli niskie dochody rodziny
 
 ```{r echo=FALSE, warning=FALSE}
 ld_counts <- dane_zwalidowane %>%
@@ -849,7 +865,7 @@ corrplot(macierz_korelacji, method = "circle", type = "upper",
 
 ```
 
-## Wnioskowanie statystyczne 
+## Wnioskowanie statystyczne
 
 Wykres poniżej prezentuje *Exam_Score* w zależności od występowania *Learning_Disabilities* (wyrażane w *Yes* lub *No*). Jak widzimy na wykresie, osoby bez trudności w nauce czasami osiągają wyższe wyniki. Średnia dla osób bez trudności wynosi 67,34, a adla osób z trudnościami 66,36. Różnica między wynikami egzaminów uczniów bez i z trudnościami w nauce jest statystycznie istotna, choć nie jest bardzo duża. Wartość Hedges' g wskazuje na mały efekt wielkości różnicy, co oznacza, że uczniowie bez trudności w nauce mają nieco wyższe wyniki egzaminów niż uczniowie z trudnościami w nauce.
 
@@ -876,7 +892,7 @@ Wykres wiolinowy widoczny poniżej prezentuje zależność między zmienną *Ext
 
 Histogram poniżej pokazuje wpływ zmiennej *Attendance* na *Exam_Score*. Niebieską linią zaznaczono średnią obecność na zajęciach, która wynosi 80,02. Wartość t-sudent na poziomie 456,02 oraz współczynnika Hedyges'a na poziomie 5,87 wskazują na silny wpływ obecności na zajęciach na wynik egzaminu.
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 set.seed(123)
   gghistostats(
   data       = dane_zwalidowane,
