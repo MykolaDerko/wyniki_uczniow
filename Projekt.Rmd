@@ -246,8 +246,7 @@ grubbs.test(dane_zwalidowane$Previous_Scores)
 grubbs.test(dane_zwalidowane$Tutoring_Sessions)
 grubbs.test(dane_zwalidowane$Exam_Score)
 ```
-
-# Analiza danych
+# Analiza i wizualizacja danych
 
 Jak widać na wykresie poniżej, w próbce dominują mężczyźni. W zbiorze znajduje się 42 % kobiet oraz 58 % mężczyzn.
 
@@ -370,15 +369,15 @@ ggplot(dane_zwalidowane, aes(x = Access_to_Resources, y = Exam_Score, fill = Acc
        y ="Wynik egzaminu")+
   scale_fill_brewer(palette ="Set5")
 ```
-
-# Do poprawy ??
-
+Poniższy wykres rozrzutu przestawia relację między zmienną *Previous_Score* a *Exam_Score*. Różowa linia regresji sugeruje lekkko poytywną korelację - wyższy wynik z wcześniejszych egzaminów może delikatnie pozytywnie wpływać na lepszy wynik egzaminu końcowego. Rozkład jest równomierny, większość obserwacji jest zbliżona do osi. 
 ```{r echo=FALSE, warning=FALSE}
-ggplot(dane_zwalidowane, aes(x = Exam_Score))+
-  geom_histogram(binwidth =5, fill ="steelblue", color ="black")+
+ggplot(dane_zwalidowane, aes(x = Previous_Scores, y = Exam_Score))+
+  geom_point(color ="purple", alpha =0.6)+
+  geom_smooth(method ="lm", color ="pink", se =FALSE)+
   theme_minimal()+
-  labs(title ="Rozkład wyników egzaminów w zależności od trudności w nauce", x ="Wynik egzaminu", y ="Liczba uczniów")+
-  facet_grid(~Learning_Disabilities)
+  labs(title ="Relacja między wynikami poprzednich egzaminów a wynikiem egzaminu końcowego",
+       x ="Wyniki poprzednich egzaminów",
+       y ="Wynik egzaminu końcowego")
 ```
 
 Poniższy wykres heksagonalny przedstawia zależność między *Exam_Score* a zmienną *Distance_from_Home* (zmienna wyrażona w wartościach *Far* (daleko), *Moderate* (umiarkowanie) oraz *Near* (blisko)). Wyniki egzaminów uczniów, którzy mają daleko do szkoły, są bardziej rozproszone, co sugeruje większą zmienność w tych wynikach. Uczniowie mieszkający umiarkowanie daleko od szkoły osiągają lepsze i bardziej spójne wyniki egzaminów w porównaniu z uczniami mieszkającymi daleko lub blisko szkoły.W przypadku grup umiarkowanie daleko oraz blisko widać największą gęstość wyników w przedziale 60-70. Wyniki z przedziały 95-100 osiągają najczęściej osoby mieszkające blisko szkoły.
@@ -397,7 +396,9 @@ ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
   )
 ```
 
-# To może też do poprawy ? może połączyć z tym poprzednim?
+Poniższy diagram kołowy prezentuje rozkład zmiennej *Learning_Disabilities* 
+* 10,5 % badanej próbki posiada trudności w uczeniu się 
+* 89,5 % badanej próbki nie posiada trudności w nauce 
 
 ```{r}
 ld_counts <- dane_zwalidowane %>%
@@ -415,7 +416,11 @@ ggplot(ld_counts, aes(x ="", y = n, fill = Learning_Disabilities))+
             color ="black", size =5)
 ```
 
-# To też do przemyślenia
+Poniższy wykres słupkowy przedstawia zależność między zmienną *Parental_Education_Level* a *Exam_Score*. Wnioski: 
+* Największa liczba uczniów pochodzi z rodzin, w których rodzice mają wykształcenie średnie (High School) – w tej grupie słupki są najwyższe.
+* Rozkład wyników jest podobny dla każdej grupy – wyniki oscylują głównie w przedziale 60-75 punktów.
+* Rodzice z wyższym wykształceniem (Postgraduate, College) – ich dzieci osiągają nieco wyższe wyniki w porównaniu do grupy "High School".
+* Wysokie wyniki (90-100 punktów) są rzadkie – niezależnie od poziomu wykształcenia rodziców, liczba uczniów z bardzo wysokimi wynikami jest niewielka.
 
 ```{r}
 ggplot(dane_zwalidowane, aes(x = Exam_Score))+
@@ -461,7 +466,13 @@ ggplot(dane_zwalidowane, aes(x = Family_Income, y = Tutoring_Sessions, color = F
   )
 ```
 
-Poniższy wykres kołowy pokazuje procentowy podział zmiennej *Family_Income*. \* 19,2% należy do kategorii *High*, czyli wysokie dochody rodziny \* 40,3% należy do kategorii *Medium*, czyli średnie dochody rodziny \* 40,5% należy do kategorii *Low*, czyli niskie dochody rodziny
+Poniższy wykres kołowy pokazuje procentowy podział zmiennej *Family_Income*.
+
+-    19,2% należy do kategorii *High*, czyli wysokie dochody rodziny
+
+-    40,3% należy do kategorii *Medium*, czyli średnie dochody rodziny
+
+-    40,5% należy do kategorii *Low*, czyli niskie dochody rodziny
 
 ```{r echo=FALSE, warning=FALSE}
 ld_counts <- dane_zwalidowane %>%
@@ -492,6 +503,8 @@ ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
 ```
 
 # Statystki Opisowe
+
+## Statystyki opisowe dla zmiennych ilościowych
 
 Z tabeli poniżej możemy odczytać statystyki opisowe dla zmiennej *Hours_Studied* Widzimy, że wartości średniej i mediany są do siebie zbliżone i wynoszą odpowiednio 19,99 oraz 20. Odchylenie standardowe można uznać za umiarkowane. Wartości tej zmiennej mieszczą się z zakresie od 1 do 44.
 
@@ -835,6 +848,8 @@ corrplot(macierz_korelacji, method = "circle", type = "upper",
          tl.col = "black", tl.srt = 45, col = colorRampPalette(c("blue", "white", "red"))(200))
 
 ```
+
+## Wnioskowanie statystyczne 
 
 Wykres poniżej prezentuje *Exam_Score* w zależności od występowania *Learning_Disabilities* (wyrażane w *Yes* lub *No*). Jak widzimy na wykresie, osoby bez trudności w nauce czasami osiągają wyższe wyniki. Średnia dla osób bez trudności wynosi 67,34, a adla osób z trudnościami 66,36. Różnica między wynikami egzaminów uczniów bez i z trudnościami w nauce jest statystycznie istotna, choć nie jest bardzo duża. Wartość Hedges' g wskazuje na mały efekt wielkości różnicy, co oznacza, że uczniowie bez trudności w nauce mają nieco wyższe wyniki egzaminów niż uczniowie z trudnościami w nauce.
 
