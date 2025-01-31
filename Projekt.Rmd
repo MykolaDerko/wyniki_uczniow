@@ -19,11 +19,11 @@ Problemem, który analizujemy w niniejszym projekcie jest wpływ poszczególnych
 Baza danych którą analizujemy nazywa się „Wyniki uczniów”. Znajduje się w niej 20 kolumn z danymi oraz 6.608 wierszy danych. W bazie danych znajdują się zarówno zmienne liczbowe jak i jakościowe.
 
 ```{r setup, include=FALSE}
-## Global options
 knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
 	warning = FALSE,
-	cache = TRUE,
-	include = FALSE
+	cache = TRUE
 )
 library(tidyverse)
 library(VIM)
@@ -43,7 +43,7 @@ library(gt)
 library(corrplot)
 ```
 
-```{r warning=FALSE, include=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 czynniki <- read.csv("czynniki.csv")
 glimpse(czynniki)
 ```
@@ -62,7 +62,7 @@ Zostało wykonane badanie danych za pomocą funkcji *aggr*. Wykres po lewej stro
 
 Tabela po prawej stronie ilistruje współwystępowanie braków w zestawie danych. Czerwone pola oznaczają brakujące wartości. Można zauważyć, że brakujące dane są dość rozporoszone i nie występują jednocześnie w wielu zmiennych. Oznacza to, że nie instnieje współzależność pomiędzy występowaniem braków więc dane brakujące będziemy uzupełniać za pomocą podobieństwa.
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 aggr(czynniki, numbers = TRUE, sortVars = TRUE)
 ```
 
@@ -132,7 +132,7 @@ W nineijszym rodziale tworzymy reguły walidacyjne, aby zapewnić poprawność i
 
 Jak widać na poniższym wykresie walidacja została zakończona sukcesem.
 
-```{r echo=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 rules <- validator(
 Hours_Studied >= 0,
 Hours_Studied <= 168,
@@ -151,17 +151,19 @@ Sleep_Hours * 7 + Hours_Studied + Physical_Activity <= 168
 )
 
 wyniki <- confront(czynniki5, rules)
-summary(wyniki)
 plot(wyniki)
 
 dane_zwalidowane <- czynniki5 %>%
   replace_errors(rules)
 errors_removed(dane_zwalidowane)
 ```
+```{r}
+plot(wyniki)
+```
 
 ## Wartości odstające
 
-W tym rodziale za pomocą wykresów pudełkowych przestawiliśmy wartości odstające. Jak widać na poniższych wykresach zdarzają się wartości odstające. Szczeglnie w zmiennych *Exam_Score* oraz *Tutoring_Sessions*.
+W tym rodziale za pomocą wykresów pudełkowych przestawiliśmy wartości odstające. Jak widać na poniższych wykresach zdarzają się wartości odstające. Szczególnie w zmiennych *Exam_Score* oraz *Tutoring_Sessions*.
 
 ```{r eval=FALSE, warning=FALSE, include=FALSE}
 boxplot(czynniki$Hours_Studied, main="Hours Studied") 
@@ -192,7 +194,7 @@ boxplot(dane_zwalidowane$Sleep_Hours, main="Sllep Hours")
 boxplot(dane_zwalidowane$Previous_Scores, main="Previos Scores")
 boxplot(dane_zwalidowane$Tutoring_Sessions, main="Tutoring Sessions")
 boxplot(dane_zwalidowane$Exam_Score, main="Exam Score")
-par(mfrow=c(2,3)) #zmienić przy kolejnych wykresach na c(1,1) bo będzie pamiętać i tworzyć wykresy w blokach 6- wykresowych
+par(mfrow=c(2,3)) 
 boxplot(dane_zwalidowane$Hours_Studied, main="Hours Studied") 
 boxplot(dane_zwalidowane$Attendance, main="Attendance")
 boxplot(dane_zwalidowane$Sleep_Hours, main="Sllep Hours")
@@ -256,7 +258,7 @@ grubbs.test(dane_zwalidowane$Exam_Score)
 
 # Analiza i wizualizacja danych
 
-Jak widać na wykresie poniżej, w próbce dominują mężczyźni. W zbiorze znajduje się 42 % kobiet oraz 58 % mężczyzn.
+Jak widać na wykresie poniżej, w próbie dominują mężczyźni. W zbiorze znajduje się 42 % kobiet oraz 58 % mężczyzn.
 
 ```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
@@ -267,7 +269,7 @@ ggplot(dane_zwalidowane, aes(x = Gender, fill = Gender))+
   theme(plot.title = element_text(hjust =0.5))
 ```
 
-Jak widać na załączonym histogramie rozkładu zmiennej *Exam_Score* większość wyników egzaminów mieści się w zakresie 60-75 punktów. Najwięcej studentów uzyskało wynik 65-70 punktów. Wyniki powyżej 80 punktów są rzadkością.
+Jak widać na załączonym histogramie rozkładu zmiennej *Exam_Score* większość wyników egzaminów mieści się w zakresie 60-75 punktów. Najwięcej uczniów uzyskało wynik 65-70 punktów. Wyniki powyżej 80 punktów są rzadkością.
 
 ```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Exam_Score, fill = Exam_Score))+
@@ -295,7 +297,7 @@ w2 <-ggplot(dane_zwalidowane, aes(x = Hours_Studied))+
 grid.arrange(w1, w2, nrow = 1)
 ```
 
-Poniższy wykres rozrzutu przestawia relację między zmienną *Hours_Studied* a *Exam_Score*. Czerowna linia regresji sugeruje lekkko poytywną korelację - więcej godzin nauki często wiąże się z lepszym wynikiem. Widzimy, że większość studentów uczy się od 5 do 30 godzin tygodniowo i osiąga wyniki z przedziału 60-80.
+Poniższy wykres rozrzutu przestawia relację między zmienną *Hours_Studied* a *Exam_Score*. Czerowna linia regresji sugeruje lekkko poytywną korelację - więcej godzin nauki często wiąże się z lepszym wynikiem. Widzimy, że większość uczniów uczy się od 5 do 30 godzin tygodniowo i osiąga wyniki z przedziału 60-80.
 
 ```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Hours_Studied, y = Exam_Score))+
@@ -325,10 +327,9 @@ ggplot(dane_zwalidowane, aes(x = Parental_Involvement, y = Exam_Score, fill = Pa
   scale_fill_brewer(palette ="Set2")
 ```
 
-Poniższy wykres słupkowy pokazuje typ szkół do których uczęszczają badani. Zdecydowana większość próbki uczęszcza do publicznych placówek edukacyjnych.
+Poniższy wykres słupkowy pokazuje typ szkół do których uczęszczają badani. Zdecydowana większość próby uczęszcza do publicznych placówek edukacyjnych.
 
 ```{r echo=FALSE, warning=FALSE}
-# Wykres słupkowy typów szkół
 ggplot(dane_zwalidowane, aes(x = School_Type, fill = School_Type))+
   geom_bar()+
   theme_minimal()+
@@ -390,13 +391,13 @@ ggplot(dane_zwalidowane, aes(x = Previous_Scores, y = Exam_Score))+
        y ="Wynik egzaminu końcowego")
 ```
 
-Poniższy wykres heksagonalny przedstawia zależność między *Exam_Score* a zmienną *Distance_from_Home* (zmienna wyrażona w wartościach *Far* (daleko), *Moderate* (umiarkowanie) oraz *Near* (blisko)). Wyniki egzaminów uczniów, którzy mają daleko do szkoły, są bardziej rozproszone, co sugeruje większą zmienność w tych wynikach. Uczniowie mieszkający umiarkowanie daleko od szkoły osiągają lepsze i bardziej spójne wyniki egzaminów w porównaniu z uczniami mieszkającymi daleko lub blisko szkoły.W przypadku grup umiarkowanie daleko oraz blisko widać największą gęstość wyników w przedziale 60-70. Wyniki z przedziały 95-100 osiągają najczęściej osoby mieszkające blisko szkoły.
+Poniższy wykres heksagonalny przedstawia zależność między *Exam_Score* a zmienną *Distance_from_Home* (zmienna wyrażona w wartościach *Far* (daleko), *Moderate* (umiarkowanie) oraz *Near* (blisko)). Wyniki egzaminów uczniów, którzy mają daleko do szkoły, są bardziej rozproszone, co sugeruje większą zmienność w tych wynikach. Uczniowie mieszkający umiarkowanie daleko od szkoły osiągają lepsze i bardziej spójne wyniki egzaminów w porównaniu z uczniami mieszkającymi daleko lub blisko szkoły.W przypadku grup umiarkowanie daleko oraz blisko widać największą gęstość wyników w przedziale 60-70. Wyniki z przedziału 95-100 osiągają najczęściej osoby mieszkające blisko szkoły.
 
 ```{r echo=FALSE, warning=FALSE}
 # Wykres heksagonalny
 ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
-  geom_hex(bins = 30) + # Liczba przedziałów (możesz dostosować np. 20, 40)
-  scale_fill_viridis_c() + # Kolorystyka dla lepszej wizualizacji
+  geom_hex(bins = 30) + 
+  scale_fill_viridis_c() + 
   theme_minimal() +
   labs(
     title = "Zależność między wynikiem egzaminu a dystansem od domu",
@@ -408,14 +409,14 @@ ggplot(dane_zwalidowane, aes(x = Distance_from_Home, y = Exam_Score)) +
 
 Poniższy diagram kołowy prezentuje rozkład zmiennej *Learning_Disabilities*
 
--   10,5 % badanej próbki posiada trudności w uczeniu się
+-   10,5 % badanej próbie posiada trudności w uczeniu się
 
--    89,5 % badanej próbki nie posiada trudności w nauce
+-   89,5 % badanej próbie nie posiada trudności w nauce
 
 ```{r echo=FALSE, warning=FALSE}
 ld_counts <- dane_zwalidowane %>%
   count(Learning_Disabilities)%>%
-  mutate(Percentage =round(n /sum(n)*100,1))# Zaokrąglamy do 1 miejsca po przecinku# Tworzenie wykresu kołowego
+  mutate(Percentage =round(n /sum(n)*100,1))
 ggplot(ld_counts, aes(x ="", y = n, fill = Learning_Disabilities))+
   geom_bar(stat ="identity", width =1)+
   coord_polar("y", start =0)+
@@ -449,16 +450,15 @@ ggplot(dane_zwalidowane, aes(x = Exam_Score))+
 Wykres poniżej przedstawia wpływ zmiennej *Teacher_Quality* (wyrażonej w wartościach *Low*, *Medium* lub *High*) na *Exam_Results*. W przypadku niskiej i średniej jakości nauczycieli mediana wyników z egzaminów wynosi 67. Uczniowie wysokiej jakości nauczycieli osiągają wyniki z medianą na poziomie 68. Wynika z tego, że jakość nauczyciela ma niewielki pozytywny wpływ na medianę wyników uczniów.
 
 ```{r echo=FALSE, warning=FALSE}
-# Upewniamy się, że kategorie są w poprawnej kolejności
-dane_zwalidowane$Teacher_Quality <- factor(dane_zwalidowane$Teacher_Quality, levels =c("Low","Medium","High"))# Obliczenie mediany wyników egzaminów dla każdej kategorii jakości nauczycieli
+dane_zwalidowane$Teacher_Quality <- factor(dane_zwalidowane$Teacher_Quality, levels =c("Low","Medium","High"))
 median_scores <- dane_zwalidowane %>%
   group_by(Teacher_Quality)%>%
-  summarise(Median_Exam_Score = median(Exam_Score, na.rm =TRUE))# Wykres liniowy z medianą
+  summarise(Median_Exam_Score = median(Exam_Score, na.rm =TRUE))
 ggplot(median_scores, aes(x = Teacher_Quality, y = Median_Exam_Score, group =1))+
-  geom_line(color ="#ff6347", size =1)+# Linia wykresu
-  geom_point(color ="darkred", size =3)+# Punkty oznaczające medianę
-  geom_text(aes(label =round(Median_Exam_Score,1)), vjust =-1)+# Etykiety mediany
-  ylim(0,100)+# Skala od 0 do 100
+  geom_line(color ="#ff6347", size =1)+
+  geom_point(color ="darkred", size =3)+
+  geom_text(aes(label =round(Median_Exam_Score,1)), vjust =-1)+
+  ylim(0,100)+
   theme_minimal()+
   ggtitle("Mediana wyniku egzaminu a jakość nauczycieli")+
   xlab("Jakość nauczycieli")+
@@ -470,8 +470,8 @@ Wykres poniżej ukazuje relacje między zmienną *Family_Income* (wyrażony w wa
 
 ```{r echo=FALSE, warning=FALSE}
 ggplot(dane_zwalidowane, aes(x = Family_Income, y = Tutoring_Sessions, color = Family_Income)) +
-  geom_jitter(width = 0.2, alpha = 0.7) + # Dodanie punktów z małym zakłóceniem na osi X (w celu uniknięcia nakładania punktów)
-  geom_smooth(method = "lm", se = FALSE, color = "black") + # Linia trendu (regresji liniowej)
+  geom_jitter(width = 0.2, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") + 
   scale_color_manual(values = c("High" = "lightgreen", "Medium" = "lightblue", "Low" = "lightpink")) +
   theme_minimal() +
   labs(
@@ -493,7 +493,7 @@ Poniższy wykres kołowy pokazuje procentowy podział zmiennej *Family_Income*.
 ```{r echo=FALSE, warning=FALSE}
 ld_counts <- dane_zwalidowane %>%
   count(Family_Income)%>%
-  mutate(Percentage =round(n /sum(n)*100,1))# Zaokrąglamy do 1 miejsca po przecinku# Tworzenie wykresu kołowego
+  mutate(Percentage =round(n /sum(n)*100,1))
 ggplot(ld_counts, aes(x ="", y = n, fill = Family_Income))+
   geom_bar(stat ="identity", width =1)+
   coord_polar("y", start =0)+
@@ -518,9 +518,7 @@ ggplot(dane_zwalidowane, aes(x = Sleep_Hours, y = Exam_Score)) +
        y = "Wynik egzaminu")
 ```
 
-# Statystki Opisowe
-
-## Statystyki opisowe dla zmiennych ilościowych
+# Analiza opisowa
 
 Z tabeli poniżej możemy odczytać statystyki opisowe dla zmiennej *Hours_Studied* Widzimy, że wartości średniej i mediany są do siebie zbliżone i wynoszą odpowiednio 19,99 oraz 20. Odchylenie standardowe można uznać za umiarkowane. Wartości tej zmiennej mieszczą się z zakresie od 1 do 44.
 
@@ -531,7 +529,6 @@ zmienne_ilosciowe <- dane_zwalidowane %>%
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Hours_Studied
 stat_desc <- data %>%
   summarise(
     średnia = mean(Hours_Studied, na.rm = TRUE),
@@ -541,7 +538,7 @@ stat_desc <- data %>%
     maksimum = max(Hours_Studied, na.rm = TRUE)
   ) %>%
   pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    cols = everything(),  
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
@@ -582,7 +579,7 @@ zmienne_ilosciowe <- dane_zwalidowane %>%
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Attendance
+
 stat_desc <- data %>%
   summarise(
     średnia = mean(Attendance, na.rm = TRUE),
@@ -592,7 +589,7 @@ stat_desc <- data %>%
     maksimum = max(Attendance, na.rm = TRUE)
   ) %>%
   pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    cols = everything(),  
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
@@ -634,7 +631,7 @@ zmienne_ilosciowe <- dane_zwalidowane %>%
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Sleep_Hours
+
 stat_desc <- data %>%
   summarise(
     średnia = mean(Sleep_Hours, na.rm = TRUE),
@@ -644,7 +641,7 @@ stat_desc <- data %>%
     maksimum = max(Sleep_Hours, na.rm = TRUE)
   ) %>%
   pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    cols = everything(),  
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
@@ -685,7 +682,7 @@ zmienne_ilosciowe <- dane_zwalidowane %>%
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Tutoring_Sessions
+
 stat_desc <- data %>%
   summarise(
     średnia = mean(Tutoring_Sessions, na.rm = TRUE),
@@ -695,7 +692,7 @@ stat_desc <- data %>%
     maksimum = max(Tutoring_Sessions, na.rm = TRUE)
   ) %>%
   pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    cols = everything(),  
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
@@ -736,7 +733,7 @@ zmienne_ilosciowe <- dane_zwalidowane %>%
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Physical_Activity
+
 stat_desc <- data %>%
   summarise(
     średnia = mean(Physical_Activity, na.rm = TRUE),
@@ -746,7 +743,7 @@ stat_desc <- data %>%
     maksimum = max(Physical_Activity, na.rm = TRUE)
   ) %>%
   pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    cols = everything(),  
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
@@ -788,7 +785,6 @@ zmienne_ilosciowe <- dane_zwalidowane %>%
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
 data <- zmienne_ilosciowe
-# Wyliczenie statystyk opisowych dla zmiennej Exam_Score
 stat_desc <- data %>%
   summarise(
     średnia = mean(Exam_Score, na.rm = TRUE),
@@ -798,7 +794,7 @@ stat_desc <- data %>%
     maksimum = max(Exam_Score, na.rm = TRUE)
   ) %>%
   pivot_longer(
-    cols = everything(),  # Wszystkie kolumny przekształcamy w długą tabelę
+    cols = everything(),  
     names_to = "Statystyka",
     values_to = "Wartość"
   ) 
@@ -833,41 +829,34 @@ stat_desc %>%
 
 Wykres poniżej przedstawia macierz korelacji. Uwzględnia on wpływ zmiennych *Hours_Studied*, *Attendance*, *Sleep_Hours*, *Previous_Scores*, *Tutoring_Sesions*, *Phisical_Activity* na zmienną *Exam_Score*.
 
--   *Hours_Studied* - istnieje wyraźna dodatnia korelacja, co sugeruje, że więcej godzin nauki jest związane z wyższymi wynikami egzaminów.
+-   *Hours_Studied* - istnieje wyraźna dodatnia korelacja, co sugeruje, że większa liczba godzin nauki jest związana z wyższymi wynikami egzaminów.
 
 -   *Attendance* - istnieje wyraźna dodatnia korelacja, co sugeruje, że czym wyższa obecność na zajęciach, tym wyższe wyniki z egzaminu.
 
--   *Sleep_Hours* - korelacja jest bardzo słaba, albo nie ma jej wcale
+-   *Sleep_Hours* - korelacja jest bardzo słaba, albo nie ma jej wcale.
 
--   *Previous_Scores* - korelacja jest dodatnia, ale słaba, więc można z tego wywynioskwać, że wyniki poprzednich egzaminów mają niewielki wpływ na obecną ocenę studenta. Wysokie wyniki w przeszłości dają niewielkie prawdpodobieństwo osiągnięcia wyższych wyników obecnie
+-   *Previous_Scores* - korelacja jest dodatnia, ale słaba, więc można z tego wywynioskować, że wyniki poprzednich egzaminów mają niewielki wpływ na obecną ocenę ucznia. Wysokie wyniki w przeszłości dają niewielkie prawdpodobieństwo osiągnięcia wyższych wyników obecnie.
 
--   *Tutoring_Sesions* - korelacja jest dodatnia, ale bardzo słaba. Możemy to zinterpretować jako: Więcej sesji korepetycji może (ale nie musi) prowadzić do wyższego wyniku z egzaminu
+-   *Tutoring_Sesions* - korelacja jest dodatnia, ale bardzo słaba. Możemy to zinterpretować jako: Więcej sesji korepetycji może (ale nie musi) prowadzić do wyższego wyniku z egzaminu.
 
--   *Phisical_Activity* - korelacja jest bardzo słaba, albo nie ma jej wcale
+-   *Phisical_Activity* - korelacja jest bardzo słaba, albo nie ma jej wcale.
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
  
- 
-# Statystyki opisowe dla zmiennych ilościowych
 zmienne_ilosciowe <- dane_zwalidowane %>%
   select(Hours_Studied, Attendance, Sleep_Hours, Previous_Scores, 
          Tutoring_Sessions, Physical_Activity, Exam_Score)
 
-
- 
-#. Macierz korelacji dla zmiennych ilościowych
 macierz_korelacji <- cor(zmienne_ilosciowe, use = "complete.obs")
-print(macierz_korelacji)
  
-# Wizualizacja macierzy korelacji
 corrplot(macierz_korelacji, method = "circle", type = "upper", 
          tl.col = "black", tl.srt = 45, col = colorRampPalette(c("blue", "white", "red"))(200))
 
 ```
 
-## Wnioskowanie statystyczne
+# Wnioskowanie statystyczne
 
-Wykres poniżej prezentuje *Exam_Score* w zależności od występowania *Learning_Disabilities* (wyrażane w *Yes* lub *No*). Jak widzimy na wykresie, osoby bez trudności w nauce czasami osiągają wyższe wyniki. Średnia dla osób bez trudności wynosi 67,34, a adla osób z trudnościami 66,36. Różnica między wynikami egzaminów uczniów bez i z trudnościami w nauce jest statystycznie istotna, choć nie jest bardzo duża. Wartość Hedges' g wskazuje na mały efekt wielkości różnicy, co oznacza, że uczniowie bez trudności w nauce mają nieco wyższe wyniki egzaminów niż uczniowie z trudnościami w nauce.
+Wykres poniżej prezentuje *Exam_Score* w zależności od występowania *Learning_Disabilities* (wyrażane w *Yes* lub *No*). Jak widzimy na wykresie, osoby bez trudności w nauce czasami osiągają wyższe wyniki. Średnia dla osób bez trudności wynosi 67,34; a dla osób z trudnościami 66,36. Różnica między wynikami egzaminów uczniów bez i z trudnościami w nauce jest statystycznie istotna, choć nie jest bardzo duża. Wartość Hedges' g wskazuje na mały efekt wielkości różnicy, co oznacza, że uczniowie bez trudności w nauce mają nieco wyższe wyniki egzaminów niż uczniowie z trudnościami w nauce.
 
 ```{r echo=FALSE, warning=FALSE}
 library(ggstatsplot)
@@ -879,7 +868,7 @@ library(ggstatsplot)
    )
 ```
 
-Wykres wiolinowy widoczny poniżej prezentuje zależność między zmienną *Extracurricular_Activities* a *Exam_Score*. Jak widać na wykresie, średni wynik z egzaminu dla osób korzsytających z zajęć dodatkowych wynosi 67,46, a dla osób nie korzystających z zajęć dodatkowych 66,92. Dla osób korzystających z zajęć dodatkowych widzimy więcej wyników z przedziału 95-100. Mimo że uczniowie biorący udział w zajęciach pozaszkolnych mają nieco wyższe wyniki egzaminów, różnica ta jest statystycznie istotna, ale niewielka, co wynika z wartości współczynnika Hedges'a oraz analizy Bayesowskiej.
+Wykres wiolinowy widoczny poniżej prezentuje zależność między zmienną *Extracurricular_Activities* a *Exam_Score*. Jak widać na wykresie, średni wynik z egzaminu dla osób korzystających z zajęć dodatkowych wynosi 67,46; a dla osób nie korzystających z zajęć dodatkowych 66,92. Dla osób korzystających z zajęć dodatkowych widzimy więcej wyników z przedziału 95-100. Mimo że uczniowie biorący udział w zajęciach pozaszkolnych mają nieco wyższe wyniki egzaminów, różnica ta jest statystycznie istotna, ale niewielka, co wynika z wartości współczynnika Hedges'a oraz analizy Bayesowskiej.
 
 ```{r echo=FALSE, warning=FALSE}
  dane_zwalidowane %>%
@@ -902,3 +891,11 @@ set.seed(123)
   binwidth   = 1
 )
 ```
+
+# Zakończenie
+
+Przeprowadzona analiza pozwoliła na zidentyfikowanie kluczowych czynników wpływających na wynik testu końcowego. Wyniki wskazują, że czynniki takie jak liczba godzin nauki, zaangażowanie rodziców, dostęp do zasobów edukacyjnych oraz wcześniejsze wyniki akademickie mają wpływ na rezultaty egzaminów. Ponadto, zmienne demograficzne, takie jak płeć czy status społeczno-ekonomiczny, wykazują pewne zależności, ale ich wpływ jest mniej znaczący w porównaniu do innych czynników.
+
+Podjęte kroki w zakresie czyszczenia, imputacji i walidacji danych pozwoliły na uzyskanie rzetelnych wyników i uniknięcie błędów analitycznych. Warto zauważyć, że mimo występowania wartości odstających, nie miały one istotnego wpływu na ogólne wnioski.
+
+Uzyskane rezultaty mogą posłużyć jako podstawa do dalszych badań nad poprawą wyników uczniów. Rekomendowane jest dalsze zgłębianie tematu, szczególnie w zakresie interakcji pomiędzy czynnikami oraz ich długoterminowego wpływu na osiągnięcia uczniów.
